@@ -1,0 +1,13 @@
+# SECRET KEYS — NEVER UPLOAD
+server/.env
+.env
+
+# Node packages
+server/node_modules/
+node_modules/
+
+# Customer/order data
+server/data/orders.json
+
+# Mac files
+.DS_Store

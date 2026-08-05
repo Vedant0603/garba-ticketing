@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta
+    name="description"
+    content="Purchase tickets for Garba Night securely through Square."
+  />
+
+  <title>Garba Night Tickets</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="./style.css?v=10" />
+</head>
+
+<body>
+
+  <!-- =========================
+       HEADER
+  ========================== -->
+  <header class="site-header">
+    <div class="container nav">
+
+      <a
+        class="brand"
+        href="#top"
+        aria-label="Garba Night home"
+      >
+        <span class="brand-mark">✦</span>
+
+        <span>
+          <strong>Garba Night</strong>
+          <small>Cultural</small>
+        </span>
+      </a>
+
+      <!-- IMPORTANT:
+           This is an anchor, NOT a submit button.
+           It only scrolls to the ticket section.
+      -->
+      <a
+        class="nav-button"
+        href="#tickets"
+      >
+        Buy Tickets
+      </a>
+
+    </div>
+  </header>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+  <main id="top">
+
+    <!-- =========================
+         HERO
+    ========================== -->
+    <section class="hero">
+
+      <div class="hero-glow hero-glow-one"></div>
+      <div class="hero-glow hero-glow-two"></div>
+
+      <div class="container hero-grid">
+
+        <div class="hero-copy">
+
+          <p class="eyebrow">
+            A NIGHT OF MUSIC, DANCE & COMMUNITY
+          </p>
+
+          <h1>
+            Celebrate Garba in unforgettable style.
+          </h1>
+
+          <p class="hero-description">
+            Join us for a colourful evening of Garba, music,
+            celebration and community. Select your tickets and
+            pay securely online through Square.
+          </p>
+
+
+          <!-- EVENT DETAILS -->
+          <div class="event-details">
+
+            <div class="detail-card">
+              <span class="detail-icon">📅</span>
+
+              <div>
+                <small>Date</small>
+                <strong>
+                  Sunday, October 18, 2026
+                </strong>
+              </div>
+            </div>
+
+
+            <div class="detail-card">
+              <span class="detail-icon">🕖</span>
+
+              <div>
+                <small>Time</small>
+                <strong>
+                  7:00 PM – 11:00 PM
+                </strong>
+              </div>
+            </div>
+
+
+            <div class="detail-card">
+              <span class="detail-icon">📍</span>
+
+              <div>
+                <small>Location</small>
+                <strong>
+                  Save Max Sports Centre, Brampton
+                </strong>
+              </div>
+            </div>
+
+          </div>
+
+
+          <!-- Also only scrolls -->
+          <a
+            class="primary-button"
+            href="#tickets"
+          >
+            Get Tickets
+          </a>
+
+        </div>
+
+
+        <!-- HERO TICKET ART -->
+        <div
+          class="hero-card"
+          aria-label="Garba Night ticket preview"
+        >
+
+          <div class="ticket-art">
+
+            <div class="ticket-pattern"></div>
+
+            <p class="ticket-mini">
+              CULTURAL PRESENTS
+            </p>
+
+            <h2>
+              GARBA
+              <br />
+              NIGHT
+            </h2>
+
+            <p class="ticket-subtitle">
+              Dance • Music • Celebration
+            </p>
+
+            <div class="ticket-divider"></div>
+
+            <div class="ticket-meta">
+              <span>OCT 18</span>
+              <span>7 PM</span>
+              <span>BRAMPTON</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- =========================
+         TICKETS
+    ========================== -->
+    <section
+      class="tickets-section"
+      id="tickets"
+    >
+
+      <div class="container">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            RESERVE YOUR SPOT
+          </p>
+
+          <h2>
+            Buy your Garba tickets
+          </h2>
+
+          <p>
+            Enter the purchaser’s information and the number of
+            tickets needed. You will then be redirected to
+            Square’s secure payment page.
+          </p>
+
+        </div>
+
+
+        <div class="checkout-layout">
+
+          <!--
+            IMPORTANT FIX:
+            app.js expects #ticket-form
+          -->
+          <form
+            class="checkout-card"
+            id="ticket-form"
+            novalidate
+          >
+
+            <!-- =====================
+                 SELECT TICKETS
+            ====================== -->
+            <div class="form-section">
+
+              <div class="form-section-heading">
+
+                <span>1</span>
+
+                <div>
+                  <h3>Select tickets</h3>
+
+                  <p>
+                    Enter any whole-number quantity,
+                    subject to availability.
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div class="ticket-option">
+
+                <div>
+
+                  <strong>
+                    Early Bird General Admission
+                  </strong>
+
+                  <p>
+                    Entry for one guest
+                  </p>
+
+                </div>
+
+
+                <div class="ticket-price">
+
+                  <strong
+                    id="ticket-price-label"
+                    data-ticket-price
+                  >
+                    $10.00
+                  </strong>
+
+
+                  <label class="quantity-control">
+
+                    <span>Quantity</span>
+
+                    <input
+                      id="quantity"
+                      name="quantity"
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      max="750"
+                      step="1"
+                      value="1"
+                      placeholder="1"
+                      required
+                    />
+
+                  </label>
+
+                </div>
+
+              </div>
+
+
+              <p class="availability-note">
+                Maximum venue capacity: 750 guests.
+                Ticket availability is verified by the system
+                before checkout.
+              </p>
+
+            </div>
+
+
+            <!-- =====================
+                 PURCHASER INFORMATION
+            ====================== -->
+            <div class="form-section">
+
+              <div class="form-section-heading">
+
+                <span>2</span>
+
+                <div>
+
+                  <h3>
+                    Purchaser information
+                  </h3>
+
+                  <p>
+                    The person named here must be present
+                    at event check-in.
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div class="form-grid">
+
+                <!-- NAME -->
+                <div class="field">
+
+                  <label for="fullName">
+                    Purchaser’s full legal name
+                  </label>
+
+                  <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    autocomplete="name"
+                    placeholder="Your full legal name"
+                    maxlength="100"
+                    required
+                  />
+
+                  <small class="error-message"></small>
+
+                </div>
+
+
+                <!-- EMAIL -->
+                <div class="field">
+
+                  <label for="email">
+                    Email address
+                  </label>
+
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    maxlength="150"
+                    required
+                  />
+
+                  <small class="error-message"></small>
+
+                </div>
+
+
+                <!-- PHONE -->
+                <div class="field">
+
+                  <label for="phone">
+                    Phone number
+                  </label>
+
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    placeholder="647-555-1234"
+                    maxlength="30"
+                    required
+                  />
+
+                  <small class="error-message"></small>
+
+                </div>
+
+
+                <!-- NOTES -->
+                <div class="field">
+
+                  <label for="notes">
+
+                    Notes
+
+                    <span>
+                      (optional)
+                    </span>
+
+                  </label>
+
+                  <input
+                    id="notes"
+                    name="notes"
+                    type="text"
+                    maxlength="200"
+                    placeholder="Accessibility or other notes"
+                  />
+
+                  <small class="error-message"></small>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- =====================
+                 ENTRY POLICY
+            ====================== -->
+            <div class="entry-policy">
+
+              <h3>
+                Entry requirements
+              </h3>
+
+              <ul>
+
+                <li>
+                  The original purchaser named on the
+                  order must be present.
+                </li>
+
+                <li>
+                  Please bring valid photo identification
+                  matching the purchaser’s name.
+                </li>
+
+                <li>
+                  The ticket confirmation email containing
+                  the admission code must be shown at check-in.
+                </li>
+
+                <li>
+                  Admission is approved only after the
+                  admission code is validated against the
+                  live check-in system.
+                </li>
+
+              </ul>
+
+            </div>
+
+
+            <!-- AGREEMENT -->
+            <label class="consent-row">
+
+              <input
+                id="agreement"
+                name="agreement"
+                type="checkbox"
+                required
+              />
+
+              <span>
+                I confirm that the information entered is
+                correct, the named purchaser will attend,
+                and tickets will only be issued after Square
+                confirms successful payment.
+              </span>
+
+            </label>
+
+
+            <!--
+              IMPORTANT FIX:
+              Only THIS button submits the form.
+
+              app.js expects #pay-button
+            -->
+            <button
+              class="submit-button"
+              id="pay-button"
+              type="submit"
+            >
+              Pay Securely with Square
+            </button>
+
+
+            <p class="privacy-note">
+              Card information is entered only on Square’s
+              secure checkout page. This website never receives
+              or stores card numbers, PINs or CVC codes.
+            </p>
+
+          </form>
+
+
+          <!-- =====================
+               ORDER SUMMARY
+          ====================== -->
+          <aside class="order-summary">
+
+            <p class="summary-label">
+              ORDER SUMMARY
+            </p>
+
+
+            <div class="summary-event">
+
+              <div class="summary-date">
+
+                <span>OCT</span>
+
+                <strong>
+                  18
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <h3>
+                  Garba Night 2026
+                </h3>
+
+                <p>
+                  Save Max Sports Centre
+                </p>
+
+                <p>
+                  7:00 PM – 11:00 PM
+                </p>
+
+              </div>
+
+            </div>
+
+
+            <div class="summary-lines">
+
+              <div>
+
+                <span>
+                  Early bird admission ×
+
+                  <b
+                    id="summary-quantity"
+                    data-ticket-quantity
+                  >
+                    1
+                  </b>
+
+                </span>
+
+
+                <strong
+                  id="summary-subtotal"
+                  data-ticket-subtotal
+                >
+                  $10.00
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  Website service fee
+                </span>
+
+                <strong>
+                  $0.00
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="summary-total">
+
+              <span>
+                Total
+              </span>
+
+              <strong
+                id="summary-total"
+                data-ticket-total
+              >
+                $10.00 CAD
+              </strong>
+
+            </div>
+
+
+            <div class="payment-badge">
+
+              <span>
+                🔒
+              </span>
+
+              <div>
+
+                <strong>
+                  Secure Square Checkout
+                </strong>
+
+                <p>
+                  Card and supported digital-wallet payments.
+                </p>
+
+              </div>
+
+            </div>
+
+          </aside>
+
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         HOW IT WORKS
+    ========================== -->
+    <section class="how-it-works">
+
+      <div class="container">
+
+        <div class="section-heading centered">
+
+          <p class="eyebrow">
+            HOW IT WORKS
+          </p>
+
+          <h2>
+            Secure automatic checkout
+          </h2>
+
+        </div>
+
+
+        <div class="steps-grid">
+
+          <article class="step-card">
+
+            <span>01</span>
+
+            <h3>
+              Order
+            </h3>
+
+            <p>
+              Enter the purchaser details and choose
+              the number of tickets.
+            </p>
+
+          </article>
+
+
+          <article class="step-card">
+
+            <span>02</span>
+
+            <h3>
+              Pay
+            </h3>
+
+            <p>
+              Complete payment on Square’s secure
+              hosted checkout page.
+            </p>
+
+          </article>
+
+
+          <article class="step-card">
+
+            <span>03</span>
+
+            <h3>
+              Receive
+            </h3>
+
+            <p>
+              After successful payment, you will receive
+              one confirmation email containing your
+              admission code and ticket information.
+            </p>
+
+          </article>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       FOOTER
+  ========================== -->
+  <footer class="site-footer">
+
+    <div class="container footer-content">
+
+      <div>
+
+        <strong>
+          Garba Night 2026
+        </strong>
+
+        <p>
+          Secure ticket checkout powered by Square
+        </p>
+
+      </div>
+
+
+      <p>
+        The original purchaser must be present at admission.
+      </p>
+
+    </div>
+
+  </footer>
+
+
+  <!--
+    Cache-busted so Chrome loads the current app.js
+  -->
+  <script src="./js/app.js?v=12"></script>
+
+</body>
+</html>
