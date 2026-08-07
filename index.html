@@ -10,15 +10,12 @@
 
   <meta
     name="description"
-    content="Purchase tickets for Garba Night 2026."
+    content="Purchase tickets for Garba Night securely through Square."
   />
 
   <title>Garba Night Tickets</title>
 
-  <link
-    rel="preconnect"
-    href="https://fonts.googleapis.com"
-  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
 
   <link
     rel="preconnect"
@@ -31,44 +28,147 @@
     rel="stylesheet"
   />
 
-  <link
-    rel="stylesheet"
-    href="./style.css?v=10"
-  />
+  <link rel="stylesheet" href="./style.css?v=20" />
+
+  <style>
+    .purchaser-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .purchaser-grid .field {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .purchaser-grid .field input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .checkbox-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .consent-row input {
+      flex: 0 0 auto;
+      margin-top: 4px;
+    }
+
+    .marketing-consent {
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(80, 40, 30, 0.12);
+    }
+
+    .optional-label {
+      font-weight: 700;
+    }
+
+    .summary-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 24px 0;
+      margin-top: 20px;
+      border-top: 1px solid rgba(80, 40, 30, 0.15);
+      border-bottom: 1px solid rgba(80, 40, 30, 0.15);
+    }
+
+    .summary-lines > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .summary-lines span {
+      color: #6d554d;
+    }
+
+    .summary-lines strong {
+      color: #2b1712;
+      text-align: right;
+    }
+
+    .summary-total-only {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 26px 0 20px;
+    }
+
+    .summary-total-only span {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .summary-total-only strong {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .summary-buy-button {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 17px 22px;
+      margin-top: 4px;
+      background: #cf371f;
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .summary-buy-button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 900px) {
+      .purchaser-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
-
-  <!-- ========================================================= -->
-  <!-- HEADER                                                    -->
-  <!-- ========================================================= -->
 
   <header class="site-header">
     <div class="container nav">
 
       <a
-        href="#tickets"
         class="brand"
+        href="#top"
         aria-label="Garba Night home"
       >
-        <div class="brand-mark">
-          ✦
-        </div>
+        <span class="brand-mark">✦</span>
 
-        <div class="brand-copy">
-          <strong>
-            Garba Night
-          </strong>
-
-          <span>
-            Cultural
-          </span>
-        </div>
+        <span>
+          <strong>Garba Night</strong>
+          <small>Cultural</small>
+        </span>
       </a>
 
       <a
+        class="nav-button"
         href="#tickets"
-        class="nav-buy-button"
       >
         Buy Tickets
       </a>
@@ -77,53 +177,172 @@
   </header>
 
 
-  <!-- ========================================================= -->
-  <!-- MAIN                                                     -->
-  <!-- ========================================================= -->
+  <main id="top">
 
-  <main>
+    <section class="hero">
+
+      <div class="hero-glow hero-glow-one"></div>
+      <div class="hero-glow hero-glow-two"></div>
+
+      <div class="container hero-grid">
+
+        <div class="hero-copy">
+
+          <p class="eyebrow">
+            A NIGHT OF MUSIC, DANCE & COMMUNITY
+          </p>
+
+          <h1>
+            Celebrate Garba in unforgettable style.
+          </h1>
+
+          <p class="hero-description">
+            Join us for a colourful evening of Garba, music,
+            celebration and community. Select your tickets and
+            pay securely online through Square.
+          </p>
+
+
+          <div class="event-details">
+
+            <div class="detail-card">
+              <span class="detail-icon">📅</span>
+
+              <div>
+                <small>Date</small>
+                <strong>
+                  Sunday, October 18, 2026
+                </strong>
+              </div>
+            </div>
+
+
+            <div class="detail-card">
+              <span class="detail-icon">🕖</span>
+
+              <div>
+                <small>Time</small>
+                <strong>
+                  7:00 PM – 11:00 PM
+                </strong>
+              </div>
+            </div>
+
+
+            <div class="detail-card">
+              <span class="detail-icon">📍</span>
+
+              <div>
+                <small>Location</small>
+                <strong>
+                  Save Max Sports Centre, Brampton
+                </strong>
+              </div>
+            </div>
+
+          </div>
+
+
+          <a
+            class="primary-button"
+            href="#tickets"
+          >
+            Get Tickets
+          </a>
+
+        </div>
+
+
+        <div
+          class="hero-card"
+          aria-label="Garba Night ticket preview"
+        >
+
+          <div class="ticket-art">
+
+            <div class="ticket-pattern"></div>
+
+            <p class="ticket-mini">
+              CULTURAL PRESENTS
+            </p>
+
+            <h2>
+              GARBA
+              <br />
+              NIGHT
+            </h2>
+
+            <p class="ticket-subtitle">
+              Dance • Music • Celebration
+            </p>
+
+            <div class="ticket-divider"></div>
+
+            <div class="ticket-meta">
+              <span>OCT 18</span>
+              <span>7 PM</span>
+              <span>BRAMPTON</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
 
     <section
-      id="tickets"
       class="tickets-section"
+      id="tickets"
     >
 
       <div class="container">
 
-        <div class="ticket-layout">
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            RESERVE YOUR SPOT
+          </p>
+
+          <h2>
+            Buy your Garba tickets
+          </h2>
+
+          <p>
+            Enter the purchaser’s information and the number
+            of tickets needed. You will then be redirected to
+            Square’s secure payment page.
+          </p>
+
+        </div>
 
 
-          <!-- ================================================= -->
-          <!-- LEFT SIDE / FORM                                  -->
-          <!-- ================================================= -->
+        <div class="checkout-layout">
 
           <form
-            id="ticket-form"
             class="checkout-card"
+            id="ticket-form"
+            novalidate
           >
 
+            <div class="form-section">
 
-            <!-- =============================================== -->
-            <!-- STEP 1 — TICKETS                                -->
-            <!-- =============================================== -->
+              <div class="form-section-heading">
 
-            <section class="checkout-section">
-
-              <div class="section-heading">
-
-                <div class="step-number">
-                  1
-                </div>
+                <span>1</span>
 
                 <div>
-                  <h2>
+
+                  <h3>
                     Select tickets
-                  </h2>
+                  </h3>
 
                   <p>
                     Enter any whole-number quantity,
                     subject to availability.
                   </p>
+
                 </div>
 
               </div>
@@ -131,75 +350,72 @@
 
               <div class="ticket-option">
 
-                <div class="ticket-description">
+                <div>
 
                   <strong>
                     Early Bird General Admission
                   </strong>
 
-                  <span>
+                  <p>
                     Entry for one guest
-                  </span>
+                  </p>
 
                 </div>
 
 
-                <div class="quantity-group">
+                <div class="ticket-price">
 
-                  <label for="quantity">
-                    Quantity
+                  <label class="quantity-control">
+
+                    <span>
+                      Quantity
+                    </span>
+
+                    <input
+                      id="quantity"
+                      name="quantity"
+                      type="number"
+                      inputmode="numeric"
+                      min="1"
+                      max="1000"
+                      step="1"
+                      value="1"
+                      required
+                    />
+
                   </label>
-
-                  <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    min="1"
-                    max="1000"
-                    step="1"
-                    value="1"
-                    inputmode="numeric"
-                    required
-                  />
 
                 </div>
 
               </div>
 
 
-              <p class="capacity-note">
+              <p class="availability-note">
                 Maximum venue capacity: 1000 guests.
-                Ticket availability is verified by the
-                system before checkout.
+                Ticket availability is verified by the system
+                before checkout.
               </p>
 
-            </section>
+            </div>
 
 
-            <div class="section-divider"></div>
+            <div class="form-section">
 
+              <div class="form-section-heading">
 
-            <!-- =============================================== -->
-            <!-- STEP 2 — PURCHASER                              -->
-            <!-- =============================================== -->
-
-            <section class="checkout-section">
-
-              <div class="section-heading">
-
-                <div class="step-number">
-                  2
-                </div>
+                <span>2</span>
 
                 <div>
-                  <h2>
+
+                  <h3>
                     Purchaser information
-                  </h2>
+                  </h3>
 
                   <p>
                     The person named here must be present
                     at event check-in.
                   </p>
+
                 </div>
 
               </div>
@@ -207,204 +423,183 @@
 
               <div class="purchaser-grid">
 
-
-                <!-- Full Name -->
-
-                <div class="form-field">
+                <div class="field">
 
                   <label for="fullName">
                     Purchaser’s full legal name
                   </label>
 
                   <input
-                    type="text"
                     id="fullName"
                     name="fullName"
+                    type="text"
                     autocomplete="name"
                     placeholder="Your full legal name"
-                    minlength="2"
+                    maxlength="100"
                     required
                   />
+
+                  <small class="error-message"></small>
 
                 </div>
 
 
-                <!-- Email -->
-
-                <div class="form-field">
+                <div class="field">
 
                   <label for="email">
                     Email address
                   </label>
 
                   <input
-                    type="email"
                     id="email"
                     name="email"
+                    type="email"
                     autocomplete="email"
                     placeholder="you@example.com"
+                    maxlength="150"
                     required
                   />
+
+                  <small class="error-message"></small>
 
                 </div>
 
 
-                <!-- Phone -->
-
-                <div class="form-field">
+                <div class="field">
 
                   <label for="phone">
                     Phone number
                   </label>
 
                   <input
-                    type="tel"
                     id="phone"
                     name="phone"
+                    type="tel"
                     autocomplete="tel"
                     placeholder="647-555-1234"
+                    maxlength="30"
                     required
                   />
+
+                  <small class="error-message"></small>
 
                 </div>
 
               </div>
 
-
-              <!-- ============================================= -->
-              <!-- ENTRY REQUIREMENTS                            -->
-              <!-- ============================================= -->
-
-              <div class="entry-requirements">
-
-                <h3>
-                  Entry requirements
-                </h3>
-
-                <ul>
-                  <li>
-                    The original purchaser named on the
-                    order must be present.
-                  </li>
-
-                  <li>
-                    Please bring valid photo identification
-                    matching the purchaser’s name.
-                  </li>
-
-                  <li>
-                    The ticket confirmation email containing
-                    the admission code must be shown at
-                    check-in.
-                  </li>
-
-                  <li>
-                    Admission is approved only after the
-                    admission code is validated against the
-                    live check-in system.
-                  </li>
-                </ul>
-
-              </div>
+            </div>
 
 
-              <!-- ============================================= -->
-              <!-- OPTIONAL EMAIL CONSENT                        -->
-              <!-- ============================================= -->
+            <div class="entry-policy">
 
-              <div class="checkbox-area">
+              <h3>
+                Entry requirements
+              </h3>
 
-                <label class="checkbox-row">
+              <ul>
 
-                  <input
-                    type="checkbox"
-                    id="marketingConsent"
-                    name="marketingConsent"
-                    value="yes"
-                  />
+                <li>
+                  The original purchaser named on the
+                  order must be present.
+                </li>
 
-                  <span>
-                    <strong>
-                      Optional:
-                    </strong>
+                <li>
+                  Please bring valid photo identification
+                  matching the purchaser’s name.
+                </li>
 
-                    I would like to receive emails about
-                    future events, announcements and
-                    event-related information.
+                <li>
+                  The ticket confirmation email containing
+                  the admission code must be shown at check-in.
+                </li>
+
+                <li>
+                  Admission is approved only after the
+                  admission code is validated against the
+                  event registration records.
+                </li>
+
+              </ul>
+
+            </div>
+
+
+            <div class="checkbox-options">
+
+              <label class="consent-row marketing-consent">
+
+                <input
+                  id="marketingConsent"
+                  name="marketingConsent"
+                  type="checkbox"
+                  value="yes"
+                />
+
+                <span>
+
+                  <span class="optional-label">
+                    Optional:
                   </span>
 
-                </label>
+                  Yes, I would like to receive emails from
+                  Shree Hari Seva Trust about future events,
+                  announcements and related updates. I understand
+                  that I can unsubscribe at any time.
+
+                </span>
+
+              </label>
 
 
-                <!-- =========================================== -->
-                <!-- REQUIRED CONFIRMATION                       -->
-                <!-- =========================================== -->
+              <label class="consent-row">
 
-                <label class="checkbox-row">
+                <input
+                  id="agreement"
+                  name="agreement"
+                  type="checkbox"
+                  required
+                />
 
-                  <input
-                    type="checkbox"
-                    id="agreement"
-                    name="agreement"
-                    required
-                  />
+                <span>
+                  I confirm that the information entered is
+                  correct, the named purchaser will attend,
+                  and tickets will only be issued after Square
+                  confirms successful payment.
+                </span>
 
-                  <span>
-                    I confirm that the information entered
-                    is correct, the named purchaser will
-                    attend, and tickets will only be issued
-                    after Square confirms successful
-                    payment.
-                  </span>
+              </label>
 
-                </label>
-
-              </div>
+            </div>
 
 
-              <!-- ============================================= -->
-              <!-- MAIN BUY BUTTON                               -->
-              <!-- ============================================= -->
-
-              <button
-                type="submit"
-                id="pay-button"
-                class="pay-button"
-              >
-                Buy Tickets
-              </button>
+            <button
+              class="submit-button"
+              id="pay-button"
+              type="submit"
+            >
+              Buy Tickets
+            </button>
 
 
-              <p class="payment-security-note">
-                Card information is entered only on
-                Square’s secure checkout page. This
-                website never receives or stores card
-                numbers, PINs or CVC codes.
-              </p>
-
-            </section>
+            <p class="privacy-note">
+              Card information is entered only on Square’s
+              secure checkout page. This website never receives
+              or stores card numbers, PINs or CVC codes.
+            </p>
 
           </form>
 
 
-          <!-- ================================================= -->
-          <!-- RIGHT SIDE / ORDER SUMMARY                         -->
-          <!-- ================================================= -->
-
-          <aside class="order-summary-card">
+          <aside class="order-summary">
 
             <p class="summary-label">
               ORDER SUMMARY
             </p>
 
 
-            <!-- =============================================== -->
-            <!-- EVENT DETAILS                                   -->
-            <!-- =============================================== -->
+            <div class="summary-event">
 
-            <div class="event-summary">
-
-              <div class="date-badge">
+              <div class="summary-date">
 
                 <span>
                   OCT
@@ -417,11 +612,11 @@
               </div>
 
 
-              <div class="event-summary-copy">
+              <div>
 
-                <h2>
+                <h3>
                   Garba Night 2026
-                </h2>
+                </h3>
 
                 <p>
                   Save Max Sports Centre
@@ -436,69 +631,40 @@
             </div>
 
 
-            <!-- =============================================== -->
-            <!-- DIVIDER                                         -->
-            <!-- =============================================== -->
+            <div class="summary-lines">
 
-            <div class="summary-divider"></div>
+              <div>
 
+                <span>
+                  Early Bird Tickets
+                </span>
 
-            <!-- =============================================== -->
-            <!-- EARLY BIRD ROW                                  -->
-            <!-- =============================================== -->
+                <strong>
+                  $11.00 each
+                </strong>
 
-            <div class="summary-row ticket-type-row">
-
-              <span>
-                Early Bird Tickets
-              </span>
-
-              <strong>
-                $11.00 each
-              </strong>
-
-            </div>
+              </div>
 
 
-            <!-- =============================================== -->
-            <!-- DIVIDER                                         -->
-            <!-- =============================================== -->
+              <div>
 
-            <div class="summary-divider"></div>
+                <span>
+                  Total Tickets Purchased
+                </span>
 
+                <strong
+                  id="summary-quantity"
+                  data-ticket-quantity
+                >
+                  1
+                </strong>
 
-            <!-- =============================================== -->
-            <!-- TOTAL TICKETS                                   -->
-            <!-- =============================================== -->
-
-            <div class="summary-row">
-
-              <span>
-                Total Tickets Purchased
-              </span>
-
-              <strong
-                id="summary-quantity"
-                data-ticket-quantity
-              >
-                1
-              </strong>
+              </div>
 
             </div>
 
 
-            <!-- =============================================== -->
-            <!-- DIVIDER                                         -->
-            <!-- =============================================== -->
-
-            <div class="summary-divider"></div>
-
-
-            <!-- =============================================== -->
-            <!-- TOTAL PRICE                                     -->
-            <!-- =============================================== -->
-
-            <div class="summary-total-row">
+            <div class="summary-total-only">
 
               <span>
                 Total
@@ -514,14 +680,10 @@
             </div>
 
 
-            <!-- =============================================== -->
-            <!-- SUMMARY BUY BUTTON                              -->
-            <!-- =============================================== -->
-
             <button
-              type="submit"
-              form="ticket-form"
               class="summary-buy-button"
+              id="summary-buy-button"
+              type="button"
             >
               Buy Tickets
             </button>
@@ -537,14 +699,33 @@
   </main>
 
 
-  <!-- ========================================================= -->
-  <!-- JAVASCRIPT                                                -->
-  <!-- ========================================================= -->
+  <footer class="site-footer">
 
-  <script
-    src="./js/app.js?v=10"
-    defer
-  ></script>
+    <div class="container footer-content">
+
+      <div>
+
+        <strong>
+          Garba Night 2026
+        </strong>
+
+        <p>
+          Secure ticket checkout powered by Square
+        </p>
+
+      </div>
+
+
+      <p>
+        The original purchaser must be present at admission.
+      </p>
+
+    </div>
+
+  </footer>
+
+
+  <script src="./js/app.js?v=20"></script>
 
 </body>
 </html>
