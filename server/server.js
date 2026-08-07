@@ -11,116 +11,196 @@ const path = require("path");
 
 const app = express();
 
-/* -------------------------------------------------------------------------- */
-/* File storage                                                               */
-/* -------------------------------------------------------------------------- */
 
-const DATA_DIRECTORY = path.join(__dirname, "data");
-const ORDERS_FILE = path.join(DATA_DIRECTORY, "orders.json");
+/* ==========================================================================
+   FILE STORAGE
+   ========================================================================== */
 
-/* -------------------------------------------------------------------------- */
-/* Environment configuration                                                  */
-/* -------------------------------------------------------------------------- */
+const DATA_DIRECTORY =
+  path.join(
+    __dirname,
+    "data"
+  );
 
-const PORT = Number(process.env.PORT || 3000);
+const ORDERS_FILE =
+  path.join(
+    DATA_DIRECTORY,
+    "orders.json"
+  );
+
+
+/* ==========================================================================
+   ENVIRONMENT
+   ========================================================================== */
+
+const PORT =
+  Number(
+    process.env.PORT || 3000
+  );
 
 const FRONTEND_URL =
-  process.env.FRONTEND_URL || "http://127.0.0.1:5500";
+  process.env.FRONTEND_URL ||
+  "http://127.0.0.1:5500";
 
-const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN;
-const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID;
+const SQUARE_ACCESS_TOKEN =
+  process.env.SQUARE_ACCESS_TOKEN;
+
+const SQUARE_LOCATION_ID =
+  process.env.SQUARE_LOCATION_ID;
 
 const SQUARE_ENVIRONMENT =
-  process.env.SQUARE_ENVIRONMENT || "sandbox";
+  process.env.SQUARE_ENVIRONMENT ||
+  "sandbox";
 
 const SQUARE_WEBHOOK_SIGNATURE_KEY =
-  process.env.SQUARE_WEBHOOK_SIGNATURE_KEY;
+  process.env
+    .SQUARE_WEBHOOK_SIGNATURE_KEY;
 
 const SQUARE_WEBHOOK_URL =
   process.env.SQUARE_WEBHOOK_URL;
 
-const TICKET_PRICE_CENTS = Number(
-  process.env.TICKET_PRICE_CENTS || 1000
-);
+const TICKET_PRICE_CENTS =
+  Number(
+    process.env.TICKET_PRICE_CENTS ||
+    1100
+  );
 
-const MAX_CAPACITY = Number(
-  process.env.MAX_CAPACITY || 750
-);
+const MAX_CAPACITY =
+  Number(
+    process.env.MAX_CAPACITY ||
+    1000
+  );
 
-/*
- * Pending orders automatically release their reserved capacity after
- * 30 minutes if no successful payment webhook arrives.
- */
-const PENDING_ORDER_MINUTES = Number(
-  process.env.PENDING_ORDER_MINUTES || 30
-);
+const PENDING_ORDER_MINUTES =
+  Number(
+    process.env
+      .PENDING_ORDER_MINUTES ||
+    30
+  );
 
-const GMAIL_USER = process.env.GMAIL_USER;
 
-/*
- * Google displays App Passwords with spaces. Removing whitespace here means
- * the .env value works whether it was pasted with or without spaces.
- */
-const GMAIL_APP_PASSWORD = String(
-  process.env.GMAIL_APP_PASSWORD || ""
-).replace(/\s/g, "");
+/* --------------------------------------------------------------------------
+   EMAIL
+   -------------------------------------------------------------------------- */
+
+const GMAIL_USER =
+  process.env.GMAIL_USER;
+
+const GMAIL_APP_PASSWORD =
+  String(
+    process.env
+      .GMAIL_APP_PASSWORD ||
+    ""
+  ).replace(
+    /\s/g,
+    ""
+  );
 
 const EMAIL_FROM =
   process.env.EMAIL_FROM ||
   `Garba Night <${GMAIL_USER || ""}>`;
 
+
+/* --------------------------------------------------------------------------
+   GOOGLE SHEETS
+   -------------------------------------------------------------------------- */
+
+const GOOGLE_SHEETS_WEBHOOK_URL =
+  process.env
+    .GOOGLE_SHEETS_WEBHOOK_URL;
+
+const GOOGLE_SHEETS_SECRET =
+  process.env
+    .GOOGLE_SHEETS_SECRET;
+
+
+/* --------------------------------------------------------------------------
+   SQUARE API
+   -------------------------------------------------------------------------- */
+
 const SQUARE_API_BASE =
-  SQUARE_ENVIRONMENT === "production"
+  SQUARE_ENVIRONMENT ===
+  "production"
     ? "https://connect.squareup.com"
     : "https://connect.squareupsandbox.com";
 
-/* -------------------------------------------------------------------------- */
-/* Email client                                                               */
-/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   EMAIL CLIENT
+   ========================================================================== */
 
 const emailTransporter =
-  GMAIL_USER && GMAIL_APP_PASSWORD
+  GMAIL_USER &&
+  GMAIL_APP_PASSWORD
     ? nodemailer.createTransport({
         service: "gmail",
+
         auth: {
           user: GMAIL_USER,
-          pass: GMAIL_APP_PASSWORD,
-        },
+          pass: GMAIL_APP_PASSWORD
+        }
       })
     : null;
 
-/* -------------------------------------------------------------------------- */
-/* Order file helpers                                                         */
-/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   ORDER FILE HELPERS
+   ========================================================================== */
 
 function ensureOrdersFile() {
-  if (!fs.existsSync(DATA_DIRECTORY)) {
-    fs.mkdirSync(DATA_DIRECTORY, {
-      recursive: true,
-    });
+  if (
+    !fs.existsSync(
+      DATA_DIRECTORY
+    )
+  ) {
+    fs.mkdirSync(
+      DATA_DIRECTORY,
+      {
+        recursive: true
+      }
+    );
   }
 
-  if (!fs.existsSync(ORDERS_FILE)) {
-    fs.writeFileSync(ORDERS_FILE, "[]", "utf8");
+
+  if (
+    !fs.existsSync(
+      ORDERS_FILE
+    )
+  ) {
+    fs.writeFileSync(
+      ORDERS_FILE,
+      "[]",
+      "utf8"
+    );
   }
 }
+
 
 function readOrdersWithoutExpiring() {
   ensureOrdersFile();
 
   try {
-    const fileContents = fs.readFileSync(
-      ORDERS_FILE,
-      "utf8"
-    );
+    const contents =
+      fs.readFileSync(
+        ORDERS_FILE,
+        "utf8"
+      );
 
-    if (!fileContents.trim()) {
+    if (!contents.trim()) {
       return [];
     }
 
-    const parsed = JSON.parse(fileContents);
+    const parsed =
+      JSON.parse(
+        contents
+      );
 
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(
+      parsed
+    )
+      ? parsed
+      : [];
+
   } catch (error) {
     console.error(
       "Could not read orders.json:",
@@ -131,14 +211,20 @@ function readOrdersWithoutExpiring() {
   }
 }
 
+
 function writeOrders(orders) {
   ensureOrdersFile();
 
-  const temporaryFile = `${ORDERS_FILE}.tmp`;
+  const temporaryFile =
+    `${ORDERS_FILE}.tmp`;
 
   fs.writeFileSync(
     temporaryFile,
-    JSON.stringify(orders, null, 2),
+    JSON.stringify(
+      orders,
+      null,
+      2
+    ),
     "utf8"
   );
 
@@ -148,236 +234,408 @@ function writeOrders(orders) {
   );
 }
 
+
 function expireOldPendingOrders() {
-  const orders = readOrdersWithoutExpiring();
+  const orders =
+    readOrdersWithoutExpiring();
 
   const expirationTime =
     Date.now() -
-    PENDING_ORDER_MINUTES * 60 * 1000;
+    PENDING_ORDER_MINUTES *
+      60 *
+      1000;
 
   let changed = false;
 
-  for (const order of orders) {
-    if (order.status !== "PENDING") {
+
+  for (
+    const order
+    of orders
+  ) {
+    if (
+      order.status !==
+      "PENDING"
+    ) {
       continue;
     }
 
-    const createdTime = new Date(
-      order.createdAt
-    ).getTime();
+
+    const createdTime =
+      new Date(
+        order.createdAt
+      ).getTime();
+
 
     if (
-      Number.isFinite(createdTime) &&
-      createdTime < expirationTime
+      Number.isFinite(
+        createdTime
+      ) &&
+      createdTime <
+        expirationTime
     ) {
-      order.status = "EXPIRED";
-      order.paymentStatus = "EXPIRED";
-      order.expiredAt = new Date().toISOString();
-      order.updatedAt = new Date().toISOString();
+      order.status =
+        "EXPIRED";
+
+      order.paymentStatus =
+        "EXPIRED";
+
+      order.expiredAt =
+        new Date()
+          .toISOString();
+
+      order.updatedAt =
+        new Date()
+          .toISOString();
 
       changed = true;
     }
   }
 
+
   if (changed) {
-    writeOrders(orders);
+    writeOrders(
+      orders
+    );
   }
 
   return orders;
 }
 
+
 function readOrders() {
   return expireOldPendingOrders();
 }
 
-function updateOrder(localOrderId, changes) {
-  const orders = readOrders();
 
-  const orderIndex = orders.findIndex(
-    (order) =>
-      order.localOrderId === localOrderId
-  );
+function updateOrder(
+  localOrderId,
+  changes
+) {
+  const orders =
+    readOrders();
 
-  if (orderIndex === -1) {
+  const index =
+    orders.findIndex(
+      (order) =>
+        order.localOrderId ===
+        localOrderId
+    );
+
+  if (index === -1) {
     return null;
   }
 
-  orders[orderIndex] = {
-    ...orders[orderIndex],
+
+  orders[index] = {
+    ...orders[index],
     ...changes,
-    updatedAt: new Date().toISOString(),
+
+    updatedAt:
+      new Date()
+        .toISOString()
   };
 
-  writeOrders(orders);
 
-  return orders[orderIndex];
+  writeOrders(
+    orders
+  );
+
+  return orders[index];
 }
 
-/* -------------------------------------------------------------------------- */
-/* Capacity helpers                                                           */
-/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   CAPACITY
+   ========================================================================== */
 
 function getPaidTicketCount() {
   return readOrders()
     .filter(
-      (order) => order.status === "PAID"
+      (order) =>
+        order.status ===
+        "PAID"
     )
     .reduce(
-      (total, order) =>
-        total + Number(order.quantity || 0),
+      (
+        total,
+        order
+      ) =>
+        total +
+        Number(
+          order.quantity ||
+          0
+        ),
+
       0
     );
 }
+
 
 function getPendingTicketCount() {
   return readOrders()
     .filter(
-      (order) => order.status === "PENDING"
+      (order) =>
+        order.status ===
+        "PENDING"
     )
     .reduce(
-      (total, order) =>
-        total + Number(order.quantity || 0),
+      (
+        total,
+        order
+      ) =>
+        total +
+        Number(
+          order.quantity ||
+          0
+        ),
+
       0
     );
 }
 
-function getRemainingCapacity() {
-  const reservedTickets =
-    getPaidTicketCount() +
-    getPendingTicketCount();
 
+function getRemainingCapacity() {
   return Math.max(
-    MAX_CAPACITY - reservedTickets,
+    MAX_CAPACITY -
+      getPaidTicketCount() -
+      getPendingTicketCount(),
+
     0
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/* General helpers                                                            */
-/* -------------------------------------------------------------------------- */
 
-function cleanText(value, maxLength = 200) {
-  return String(value || "")
+/* ==========================================================================
+   GENERAL HELPERS
+   ========================================================================== */
+
+function cleanText(
+  value,
+  maxLength = 200
+) {
+  return String(
+    value || ""
+  )
     .trim()
-    .replace(/[<>]/g, "")
-    .slice(0, maxLength);
+    .replace(
+      /[<>]/g,
+      ""
+    )
+    .slice(
+      0,
+      maxLength
+    );
 }
 
-function isValidEmail(email) {
+
+function isValidEmail(
+  email
+) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
     email
   );
 }
 
-function normalizeCanadianPhone(phone) {
-  const digits = String(phone || "").replace(
-    /\D/g,
-    ""
-  );
 
-  if (digits.length === 10) {
+function normalizeCanadianPhone(
+  phone
+) {
+  const digits =
+    String(
+      phone || ""
+    ).replace(
+      /\D/g,
+      ""
+    );
+
+
+  if (
+    digits.length === 10
+  ) {
     return `+1${digits}`;
   }
 
+
   if (
     digits.length === 11 &&
-    digits.startsWith("1")
+    digits.startsWith(
+      "1"
+    )
   ) {
     return `+${digits}`;
   }
 
-  return cleanText(phone, 30);
+
+  return cleanText(
+    phone,
+    30
+  );
 }
 
-function formatCad(cents) {
-  return new Intl.NumberFormat("en-CA", {
-    style: "currency",
-    currency: "CAD",
-  }).format(Number(cents || 0) / 100);
+
+function formatCad(
+  cents
+) {
+  return new Intl
+    .NumberFormat(
+      "en-CA",
+      {
+        style:
+          "currency",
+
+        currency:
+          "CAD"
+      }
+    )
+    .format(
+      Number(
+        cents || 0
+      ) / 100
+    );
 }
 
-function escapeHtml(value) {
-  return String(value || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+
+function escapeHtml(
+  value
+) {
+  return String(
+    value || ""
+  )
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 }
+
 
 function generateAdmissionCode() {
-  const randomPart = crypto
-    .randomBytes(5)
-    .toString("hex")
-    .toUpperCase();
+  const randomPart =
+    crypto
+      .randomBytes(5)
+      .toString("hex")
+      .toUpperCase();
 
   return `RAAS-${randomPart}`;
 }
 
-function validateCheckoutRequest(body) {
-  const fullName = cleanText(
-    body.fullName,
-    100
-  );
 
-  const email = cleanText(
-    body.email,
-    150
-  ).toLowerCase();
+/* ==========================================================================
+   CHECKOUT VALIDATION
+   ========================================================================== */
 
-  const phone = normalizeCanadianPhone(
-    body.phone
-  );
+function validateCheckoutRequest(
+  body
+) {
+  const fullName =
+    cleanText(
+      body.fullName,
+      100
+    );
 
-  const notes = cleanText(
-    body.notes,
-    300
-  );
+  const email =
+    cleanText(
+      body.email,
+      150
+    ).toLowerCase();
 
-  const quantity = Number(body.quantity);
+  const phone =
+    normalizeCanadianPhone(
+      body.phone
+    );
 
-  if (fullName.length < 2) {
+  const quantity =
+    Number(
+      body.quantity
+    );
+
+
+  /*
+   * This MUST only be true when the
+   * user actively checked the box.
+   */
+  const marketingConsent =
+    body.marketingConsent ===
+    true;
+
+
+  if (
+    fullName.length < 2
+  ) {
     throw new Error(
       "Please enter the purchaser’s full legal name."
     );
   }
 
-  if (!isValidEmail(email)) {
+
+  if (
+    !isValidEmail(
+      email
+    )
+  ) {
     throw new Error(
       "Please enter a valid email address."
     );
   }
 
+
   if (
-    phone.replace(/\D/g, "").length < 10
+    phone
+      .replace(
+        /\D/g,
+        ""
+      )
+      .length <
+    10
   ) {
     throw new Error(
       "Please enter a valid phone number."
     );
   }
 
+
   if (
-    !Number.isInteger(quantity) ||
+    !Number.isInteger(
+      quantity
+    ) ||
     quantity < 1 ||
-    quantity > MAX_CAPACITY
+    quantity >
+      MAX_CAPACITY
   ) {
     throw new Error(
       `Ticket quantity must be a whole number between 1 and ${MAX_CAPACITY}.`
     );
   }
 
+
   return {
     fullName,
     email,
     phone,
-    notes,
     quantity,
+    marketingConsent
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/* Square webhook verification                                                */
-/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   SQUARE WEBHOOK SIGNATURE
+   ========================================================================== */
 
 function isValidSquareWebhookSignature(
   rawBody,
@@ -391,26 +649,40 @@ function isValidSquareWebhookSignature(
     return false;
   }
 
+
   const stringToSign =
     `${SQUARE_WEBHOOK_URL}${rawBody}`;
 
-  const expectedSignature = crypto
-    .createHmac(
-      "sha256",
-      SQUARE_WEBHOOK_SIGNATURE_KEY
-    )
-    .update(stringToSign, "utf8")
-    .digest("base64");
 
-  const expectedBuffer = Buffer.from(
-    expectedSignature,
-    "utf8"
-  );
+  const expectedSignature =
+    crypto
+      .createHmac(
+        "sha256",
+        SQUARE_WEBHOOK_SIGNATURE_KEY
+      )
+      .update(
+        stringToSign,
+        "utf8"
+      )
+      .digest(
+        "base64"
+      );
 
-  const providedBuffer = Buffer.from(
-    String(providedSignature),
-    "utf8"
-  );
+
+  const expectedBuffer =
+    Buffer.from(
+      expectedSignature,
+      "utf8"
+    );
+
+  const providedBuffer =
+    Buffer.from(
+      String(
+        providedSignature
+      ),
+      "utf8"
+    );
+
 
   if (
     expectedBuffer.length !==
@@ -419,17 +691,270 @@ function isValidSquareWebhookSignature(
     return false;
   }
 
-  return crypto.timingSafeEqual(
-    expectedBuffer,
-    providedBuffer
-  );
+
+  return crypto
+    .timingSafeEqual(
+      expectedBuffer,
+      providedBuffer
+    );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Confirmation email content                                                 */
-/* -------------------------------------------------------------------------- */
 
-function buildConfirmationEmailText(order) {
+/* ==========================================================================
+   GOOGLE SHEETS — PAID ORDERS ONLY
+   ========================================================================== */
+
+async function savePaidOrderToGoogleSheet(
+  localOrderId
+) {
+  const orders =
+    readOrders();
+
+  const index =
+    orders.findIndex(
+      (order) =>
+        order.localOrderId ===
+        localOrderId
+    );
+
+
+  if (
+    index === -1
+  ) {
+    return;
+  }
+
+
+  const order =
+    orders[index];
+
+
+  /*
+   * THIS IS THE IMPORTANT RULE:
+   *
+   * Do not send anything to Google Sheets
+   * unless Square payment has already been
+   * verified COMPLETED.
+   */
+  if (
+    order.status !==
+      "PAID" ||
+    order.paymentStatus !==
+      "COMPLETED"
+  ) {
+    console.log(
+      "Sheets skipped — order is not paid:",
+      localOrderId
+    );
+
+    return;
+  }
+
+
+  /*
+   * Don't repeatedly send if it already worked.
+   */
+  if (
+    order.sheetStatus ===
+    "SAVED"
+  ) {
+    return;
+  }
+
+
+  if (
+    !GOOGLE_SHEETS_WEBHOOK_URL ||
+    !GOOGLE_SHEETS_SECRET
+  ) {
+    console.error(
+      "Google Sheets is not configured."
+    );
+
+    updateOrder(
+      localOrderId,
+      {
+        sheetStatus:
+          "NOT_CONFIGURED"
+      }
+    );
+
+    return;
+  }
+
+
+  updateOrder(
+    localOrderId,
+    {
+      sheetStatus:
+        "SENDING",
+
+      sheetAttemptedAt:
+        new Date()
+          .toISOString()
+    }
+  );
+
+
+  try {
+    const response =
+      await fetch(
+        GOOGLE_SHEETS_WEBHOOK_URL,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "text/plain;charset=utf-8"
+          },
+
+          body:
+            JSON.stringify({
+              secret:
+                GOOGLE_SHEETS_SECRET,
+
+              status:
+                order.status,
+
+              paymentStatus:
+                order.paymentStatus,
+
+              admissionCode:
+                order.admissionCode,
+
+              fullName:
+                order.fullName,
+
+              email:
+                order.email,
+
+              phone:
+                order.phone,
+
+              quantity:
+                order.quantity,
+
+              paidAmount:
+                Number(
+                  order.paidAmountCents ||
+                  0
+                ) / 100,
+
+              currency:
+                order.currency,
+
+              marketingConsent:
+                Boolean(
+                  order.marketingConsent
+                ),
+
+              marketingConsentTimestamp:
+                order
+                  .marketingConsentTimestamp ||
+                "",
+
+              marketingConsentSource:
+                order
+                  .marketingConsentSource ||
+                "",
+
+              paidAt:
+                order.paidAt,
+
+              localOrderId:
+                order.localOrderId,
+
+              squareOrderId:
+                order.squareOrderId,
+
+              paymentId:
+                order.paymentId
+            })
+        }
+      );
+
+
+    const text =
+      await response.text();
+
+
+    let result = {};
+
+    try {
+      result =
+        JSON.parse(
+          text
+        );
+    } catch {
+      result = {
+        success:
+          response.ok
+      };
+    }
+
+
+    if (
+      !response.ok ||
+      !result.success
+    ) {
+      throw new Error(
+        result.message ||
+        `Google Sheets returned HTTP ${response.status}`
+      );
+    }
+
+
+    updateOrder(
+      localOrderId,
+      {
+        sheetStatus:
+          "SAVED",
+
+        sheetSavedAt:
+          new Date()
+            .toISOString(),
+
+        sheetError:
+          null
+      }
+    );
+
+
+    console.log(
+      "Paid order saved to Google Sheets:",
+      order.admissionCode
+    );
+
+  } catch (error) {
+    updateOrder(
+      localOrderId,
+      {
+        sheetStatus:
+          "FAILED",
+
+        sheetError:
+          cleanText(
+            error.message,
+            500
+          )
+      }
+    );
+
+
+    console.error(
+      "Google Sheets save failed:",
+      error.message
+    );
+  }
+}
+
+
+/* ==========================================================================
+   CONFIRMATION EMAIL
+   ========================================================================== */
+
+function buildConfirmationEmailText(
+  order
+) {
   return [
     "PAYMENT CONFIRMED — GARBA NIGHT 2026",
     "",
@@ -443,9 +968,8 @@ function buildConfirmationEmailText(order) {
     "ENTRY REQUIREMENTS",
     "",
     "Open this email live at event check-in.",
-    "Screenshots, photographs and printed copies are not accepted.",
     "The purchaser named on the order must be present.",
-    "Bring your driver’s licence or another government-issued photo ID so staff can confirm the purchaser’s identity.",
+    "Bring a driver's licence or another government-issued photo ID matching the purchaser.",
     "",
     "EVENT DETAILS",
     "Garba Night 2026",
@@ -455,332 +979,393 @@ function buildConfirmationEmailText(order) {
     "1495 Sandalwood Pkwy E",
     "Brampton, ON L6R 0K2",
     "",
-    `Order reference: ${order.localOrderId}`,
+    `Order reference: ${order.localOrderId}`
   ].join("\n");
 }
 
-function buildConfirmationEmailHtml(order) {
-  const purchaserName = escapeHtml(
-    order.fullName
-  );
 
-  const admissionCode = escapeHtml(
-    order.admissionCode
-  );
+function buildConfirmationEmailHtml(
+  order
+) {
+  const purchaser =
+    escapeHtml(
+      order.fullName
+    );
 
-  const localOrderId = escapeHtml(
-    order.localOrderId
-  );
+  const code =
+    escapeHtml(
+      order.admissionCode
+    );
+
+  const reference =
+    escapeHtml(
+      order.localOrderId
+    );
+
 
   return `
+  <div style="
+    background:#fff8f1;
+    padding:32px 16px;
+    color:#2b1712;
+    font-family:Arial,Helvetica,sans-serif;
+  ">
+
     <div style="
-      margin:0;
-      padding:32px 16px;
-      background:#fff8f1;
-      color:#2b1712;
-      font-family:Arial,Helvetica,sans-serif;
+      max-width:620px;
+      margin:auto;
+      background:#fff;
+      border:1px solid #efd6c8;
+      border-radius:20px;
+      overflow:hidden;
     ">
+
       <div style="
-        max-width:620px;
-        margin:0 auto;
-        overflow:hidden;
-        background:#ffffff;
-        border:1px solid #efd6c8;
-        border-radius:20px;
+        padding:30px 24px;
+        background:#bd351f;
+        color:#fff;
+        text-align:center;
       ">
+
         <div style="
-          padding:30px 24px;
-          background:#bd351f;
-          color:#ffffff;
+          font-size:13px;
+          font-weight:700;
+          letter-spacing:2px;
+          margin-bottom:8px;
+        ">
+          PAYMENT CONFIRMED
+        </div>
+
+        <h1 style="margin:0;">
+          Garba Night 2026
+        </h1>
+
+      </div>
+
+
+      <div style="padding:30px;">
+
+        <p>
+          Hello ${purchaser},
+        </p>
+
+        <p>
+          Your payment has been confirmed.
+          This email is your official
+          Garba Night admission confirmation.
+        </p>
+
+
+        <div style="
+          margin:24px 0;
+          padding:24px;
+          background:#fff3e6;
+          border-radius:16px;
           text-align:center;
         ">
-          <p style="
-            margin:0 0 8px;
+
+          <div style="
             font-size:13px;
             font-weight:700;
-            letter-spacing:2px;
+            letter-spacing:1.5px;
+            color:#7b5549;
           ">
-            PAYMENT CONFIRMED
-          </p>
-
-          <h1 style="
-            margin:0;
-            font-size:30px;
-          ">
-            Garba Night 2026
-          </h1>
-        </div>
-
-        <div style="padding:30px;">
-          <p style="
-            margin-top:0;
-            font-size:17px;
-          ">
-            Hello ${purchaserName},
-          </p>
-
-          <p style="
-            line-height:1.65;
-          ">
-            Your payment has been confirmed.
-            This email is your official Garba Night
-            admission confirmation.
-          </p>
+            ADMISSION CODE
+          </div>
 
           <div style="
-            margin:24px 0;
-            padding:24px;
-            background:#fff3e6;
-            border-radius:16px;
-            text-align:center;
+            margin-top:10px;
+            font-size:31px;
+            font-weight:800;
+            color:#bd351f;
           ">
-            <p style="
-              margin:0 0 9px;
-              color:#7b5549;
-              font-size:13px;
+            ${code}
+          </div>
+
+        </div>
+
+
+        <table style="
+          width:100%;
+          border-collapse:collapse;
+        ">
+
+          <tr>
+            <td style="padding:10px 0;">
+              Purchaser
+            </td>
+
+            <td style="
+              padding:10px 0;
+              text-align:right;
               font-weight:700;
-              letter-spacing:1.5px;
             ">
-              ADMISSION CODE
-            </p>
+              ${purchaser}
+            </td>
+          </tr>
 
-            <p style="
-              margin:0;
-              color:#bd351f;
-              font-size:31px;
-              font-weight:800;
-              letter-spacing:2px;
+
+          <tr>
+            <td style="padding:10px 0;">
+              Tickets
+            </td>
+
+            <td style="
+              padding:10px 0;
+              text-align:right;
+              font-weight:700;
             ">
-              ${admissionCode}
-            </p>
-          </div>
+              ${order.quantity}
+            </td>
+          </tr>
 
-          <table style="
-            width:100%;
-            border-collapse:collapse;
-            font-size:16px;
-          ">
-            <tr>
-              <td style="
-                padding:10px 0;
-                color:#765f57;
-              ">
-                Purchaser
-              </td>
 
-              <td style="
-                padding:10px 0;
-                text-align:right;
-                font-weight:700;
-              ">
-                ${purchaserName}
-              </td>
-            </tr>
+          <tr>
+            <td style="padding:10px 0;">
+              Amount paid
+            </td>
 
-            <tr>
-              <td style="
-                padding:10px 0;
-                color:#765f57;
-              ">
-                Tickets
-              </td>
+            <td style="
+              padding:10px 0;
+              text-align:right;
+              font-weight:700;
+            ">
+              ${formatCad(
+                order.paidAmountCents
+              )}
+            </td>
+          </tr>
 
-              <td style="
-                padding:10px 0;
-                text-align:right;
-                font-weight:700;
-              ">
-                ${order.quantity}
-              </td>
-            </tr>
+        </table>
 
-            <tr>
-              <td style="
-                padding:10px 0;
-                color:#765f57;
-              ">
-                Amount paid
-              </td>
 
-              <td style="
-                padding:10px 0;
-                text-align:right;
-                font-weight:700;
-              ">
-                ${formatCad(order.paidAmountCents)}
-              </td>
-            </tr>
-          </table>
+        <hr style="
+          border:0;
+          border-top:1px solid #efd6c8;
+          margin:24px 0;
+        ">
 
-          <div style="
-            margin:24px 0;
-            border-top:1px solid #efd6c8;
-          "></div>
 
-          <h2 style="
-            margin-bottom:12px;
-            font-size:19px;
-          ">
-            Entry requirements
-          </h2>
+        <h3>
+          Entry requirements
+        </h3>
 
-          <ul style="
-            margin:0;
-            padding-left:21px;
-            line-height:1.75;
-          ">
-            <li>
-              Open this email live at event check-in.
-            </li>
+        <ul style="
+          line-height:1.8;
+        ">
 
-            <li>
-              Screenshots, photographs and printed
-              copies are not accepted.
-            </li>
+          <li>
+            Open this confirmation email
+            at event check-in.
+          </li>
 
-            <li>
-              The purchaser named on this order must
-              be present.
-            </li>
+          <li>
+            The purchaser named on this
+            order must be present.
+          </li>
 
-            <li>
-              Bring your
-              <strong>
-                driver’s licence or another
-                government-issued photo ID
-              </strong>
-              so staff can confirm the purchaser’s
-              identity.
-            </li>
-          </ul>
+          <li>
+            Bring a driver's licence or
+            another government-issued photo ID
+            matching the purchaser's name.
+          </li>
 
-          <div style="
-            margin-top:24px;
-            padding:18px;
-            background:#faf7f5;
-            border-radius:14px;
-            line-height:1.65;
-          ">
-            <strong>
-              Sunday, October 18, 2026
-            </strong>
+        </ul>
 
-            <br>
 
-            7:00 PM – 11:00 PM
+        <div style="
+          background:#faf7f5;
+          padding:18px;
+          border-radius:14px;
+          line-height:1.65;
+          margin-top:24px;
+        ">
 
-            <br>
+          <strong>
+            Sunday, October 18, 2026
+          </strong>
 
-            Save Max Sports Centre
+          <br>
 
-            <br>
+          7:00 PM – 11:00 PM
 
-            1495 Sandalwood Pkwy E,
-            Brampton, ON L6R 0K2
-          </div>
+          <br>
 
-          <p style="
-            margin:24px 0 0;
-            color:#8c7770;
-            font-size:12px;
-          ">
-            Order reference: ${localOrderId}
-          </p>
+          Save Max Sports Centre
+
+          <br>
+
+          1495 Sandalwood Pkwy E,
+          Brampton, ON L6R 0K2
+
         </div>
+
+
+        <p style="
+          margin-top:24px;
+          font-size:12px;
+          color:#8c7770;
+        ">
+          Order reference:
+          ${reference}
+        </p>
+
       </div>
+
     </div>
+
+  </div>
   `;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Email delivery                                                             */
-/* -------------------------------------------------------------------------- */
 
-/*
- * Claims the email before sending it. This prevents repeated Square webhook
- * deliveries from deliberately sending duplicate confirmation emails.
- */
-function claimEmailDelivery(localOrderId) {
-  const orders = readOrders();
+function claimEmailDelivery(
+  localOrderId
+) {
+  const orders =
+    readOrders();
 
-  const index = orders.findIndex(
-    (order) =>
-      order.localOrderId === localOrderId
-  );
+  const index =
+    orders.findIndex(
+      (order) =>
+        order.localOrderId ===
+        localOrderId
+    );
+
 
   if (index === -1) {
     return null;
   }
 
-  const order = orders[index];
+
+  const order =
+    orders[index];
+
 
   if (
-    order.status !== "PAID" ||
-    order.emailStatus === "SENT" ||
-    order.emailStatus === "SENDING"
+    order.status !==
+      "PAID" ||
+    order.emailStatus ===
+      "SENT" ||
+    order.emailStatus ===
+      "SENDING"
   ) {
     return null;
   }
 
-  order.emailStatus = "SENDING";
-  order.emailAttemptedAt =
-    new Date().toISOString();
-  order.updatedAt =
-    new Date().toISOString();
 
-  orders[index] = order;
-  writeOrders(orders);
+  order.emailStatus =
+    "SENDING";
+
+  order.emailAttemptedAt =
+    new Date()
+      .toISOString();
+
+  order.updatedAt =
+    new Date()
+      .toISOString();
+
+
+  orders[index] =
+    order;
+
+  writeOrders(
+    orders
+  );
 
   return order;
 }
 
+
 async function sendConfirmationEmail(
   localOrderId
 ) {
-  const order = claimEmailDelivery(
-    localOrderId
-  );
+  if (
+    !emailTransporter
+  ) {
+    console.error(
+      "Email not configured."
+    );
+
+    return;
+  }
+
+
+  const order =
+    claimEmailDelivery(
+      localOrderId
+    );
+
 
   if (!order) {
     return;
   }
 
+
   try {
     const result =
-      await emailTransporter.sendMail({
-        from: EMAIL_FROM,
+      await emailTransporter
+        .sendMail({
+          from:
+            EMAIL_FROM,
 
-        to: order.email,
+          to:
+            order.email,
 
-        subject:
-          `Payment Confirmed — Garba Night 2026 — ${order.admissionCode}`,
+          subject:
+            `Payment Confirmed — Garba Night 2026 — ${order.admissionCode}`,
 
-        text:
-          buildConfirmationEmailText(order),
+          text:
+            buildConfirmationEmailText(
+              order
+            ),
 
-        html:
-          buildConfirmationEmailHtml(order),
-      });
+          html:
+            buildConfirmationEmailHtml(
+              order
+            )
+        });
 
-    updateOrder(localOrderId, {
-      emailStatus: "SENT",
-      emailMessageId: result.messageId,
-      emailSentAt: new Date().toISOString(),
-      emailError: null,
-    });
+
+    updateOrder(
+      localOrderId,
+      {
+        emailStatus:
+          "SENT",
+
+        emailMessageId:
+          result.messageId,
+
+        emailSentAt:
+          new Date()
+            .toISOString(),
+
+        emailError:
+          null
+      }
+    );
+
 
     console.log(
       "Confirmation email sent:",
       order.email
     );
+
   } catch (error) {
-    updateOrder(localOrderId, {
-      emailStatus: "FAILED",
-      emailError: cleanText(
-        error.message,
-        500
-      ),
-    });
+    updateOrder(
+      localOrderId,
+      {
+        emailStatus:
+          "FAILED",
+
+        emailError:
+          cleanText(
+            error.message,
+            500
+          )
+      }
+    );
+
 
     console.error(
       "Confirmation email failed:",
@@ -789,9 +1374,10 @@ async function sendConfirmationEmail(
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* CORS                                                                       */
-/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   CORS
+   ========================================================================== */
 
 app.use(
   cors({
@@ -799,34 +1385,40 @@ app.use(
       FRONTEND_URL,
       "http://127.0.0.1:5500",
       "http://localhost:5500",
-    ],
+      "null"
+    ]
   })
 );
 
-/* -------------------------------------------------------------------------- */
-/* Square webhook                                                             */
-/* -------------------------------------------------------------------------- */
 
-/*
- * This route must appear before express.json().
- * Square signature verification requires the original raw request body.
- */
+/* ==========================================================================
+   SQUARE WEBHOOK
+   IMPORTANT: MUST BE BEFORE express.json()
+   ========================================================================== */
+
 app.post(
   "/webhook",
 
   express.raw({
-    type: "application/json",
+    type: "application/json"
   }),
 
-  (request, response) => {
+  (
+    request,
+    response
+  ) => {
     try {
-      const rawBody = request.body.toString(
-        "utf8"
-      );
+      const rawBody =
+        request.body.toString(
+          "utf8"
+        );
 
-      const signature = request.get(
-        "x-square-hmacsha256-signature"
-      );
+
+      const signature =
+        request.get(
+          "x-square-hmacsha256-signature"
+        );
+
 
       if (
         !isValidSquareWebhookSignature(
@@ -840,59 +1432,104 @@ app.post(
 
         return response
           .status(403)
-          .send("Invalid signature");
+          .send(
+            "Invalid signature"
+          );
       }
 
-      const event = JSON.parse(rawBody);
+
+      const event =
+        JSON.parse(
+          rawBody
+        );
+
 
       console.log("");
-      console.log("Square webhook received");
-      console.log("Event type:", event.type);
-      console.log("Event ID:", event.event_id);
+      console.log(
+        "Square webhook received"
+      );
 
-      if (event.type !== "payment.updated") {
+      console.log(
+        "Event type:",
+        event.type
+      );
+
+
+      if (
+        event.type !==
+        "payment.updated"
+      ) {
         return response
           .status(200)
-          .send("Event ignored");
+          .send(
+            "Event ignored"
+          );
       }
 
+
       const payment =
-        event?.data?.object?.payment;
+        event?.data
+          ?.object
+          ?.payment;
+
 
       if (!payment) {
         return response
           .status(200)
-          .send("No payment object");
+          .send(
+            "No payment object"
+          );
       }
 
-      console.log("Payment ID:", payment.id);
+
+      console.log(
+        "Payment ID:",
+        payment.id
+      );
+
       console.log(
         "Payment status:",
         payment.status
       );
-      console.log(
-        "Square order ID:",
-        payment.order_id
-      );
 
-      if (payment.status !== "COMPLETED") {
+
+      /*
+       * CRITICAL:
+       *
+       * NOTHING gets put in Google Sheets
+       * here unless Square says COMPLETED.
+       */
+      if (
+        payment.status !==
+        "COMPLETED"
+      ) {
         return response
           .status(200)
-          .send("Payment not completed");
+          .send(
+            "Payment not completed"
+          );
       }
+
 
       const squareOrderId =
         payment.order_id;
 
-      const orders = readOrders();
 
-      const orderIndex = orders.findIndex(
-        (order) =>
-          order.squareOrderId ===
-          squareOrderId
-      );
+      const orders =
+        readOrders();
 
-      if (orderIndex === -1) {
+
+      const orderIndex =
+        orders.findIndex(
+          (order) =>
+            order.squareOrderId ===
+            squareOrderId
+        );
+
+
+      if (
+        orderIndex === -1
+      ) {
         console.error(
           "Completed payment has no matching local order:",
           squareOrderId
@@ -900,85 +1537,187 @@ app.post(
 
         return response
           .status(200)
-          .send("Unknown order");
+          .send(
+            "Unknown order"
+          );
       }
 
-      const order = orders[orderIndex];
+
+      const order =
+        orders[
+          orderIndex
+        ];
+
 
       /*
-       * Square might deliver the same event more than once.
+       * Duplicate webhook.
+       *
+       * Don't create another row.
+       * Apps Script also independently
+       * blocks duplicates.
        */
-      if (order.status === "PAID") {
+      if (
+        order.status ===
+        "PAID"
+      ) {
         response
           .status(200)
-          .send("Already processed");
+          .send(
+            "Already processed"
+          );
 
-        if (order.emailStatus !== "SENT") {
-          setImmediate(() => {
-            void sendConfirmationEmail(
-              order.localOrderId
-            );
-          });
+
+        if (
+          order.emailStatus !==
+          "SENT"
+        ) {
+          setImmediate(
+            () => {
+              void sendConfirmationEmail(
+                order.localOrderId
+              );
+            }
+          );
         }
+
+
+        if (
+          order.sheetStatus !==
+          "SAVED"
+        ) {
+          setImmediate(
+            () => {
+              void savePaidOrderToGoogleSheet(
+                order.localOrderId
+              );
+            }
+          );
+        }
+
 
         return;
       }
 
-      const paidAmountCents = Number(
-        payment.amount_money?.amount
-      );
+
+      const paidAmountCents =
+        Number(
+          payment
+            .amount_money
+            ?.amount
+        );
+
 
       const paidCurrency =
-        payment.amount_money?.currency;
+        payment
+          .amount_money
+          ?.currency;
 
-      if (
-        paidAmountCents !==
-        Number(order.expectedAmountCents)
-      ) {
-        order.status = "MANUAL_REVIEW";
-        order.reviewReason =
-          "PAYMENT_AMOUNT_MISMATCH";
-        order.paymentId = payment.id;
-        order.webhookEventId =
-          event.event_id;
-        order.updatedAt =
-          new Date().toISOString();
-
-        orders[orderIndex] = order;
-        writeOrders(orders);
-
-        return response
-          .status(200)
-          .send("Manual review required");
-      }
-
-      if (paidCurrency !== "CAD") {
-        order.status = "MANUAL_REVIEW";
-        order.reviewReason =
-          "PAYMENT_CURRENCY_MISMATCH";
-        order.paymentId = payment.id;
-        order.webhookEventId =
-          event.event_id;
-        order.updatedAt =
-          new Date().toISOString();
-
-        orders[orderIndex] = order;
-        writeOrders(orders);
-
-        return response
-          .status(200)
-          .send("Manual review required");
-      }
 
       /*
-       * Payment successfully matched and verified.
+       * Verify customer paid EXACTLY
+       * what this order expected.
        */
-      order.status = "PAID";
-      order.paymentStatus = "COMPLETED";
-      order.paymentId = payment.id;
+      if (
+        paidAmountCents !==
+        Number(
+          order.expectedAmountCents
+        )
+      ) {
+        order.status =
+          "MANUAL_REVIEW";
+
+        order.reviewReason =
+          "PAYMENT_AMOUNT_MISMATCH";
+
+        order.paymentId =
+          payment.id;
+
+        order.webhookEventId =
+          event.event_id;
+
+        order.updatedAt =
+          new Date()
+            .toISOString();
+
+
+        orders[
+          orderIndex
+        ] =
+          order;
+
+
+        writeOrders(
+          orders
+        );
+
+
+        return response
+          .status(200)
+          .send(
+            "Manual review required"
+          );
+      }
+
+
+      if (
+        paidCurrency !==
+        "CAD"
+      ) {
+        order.status =
+          "MANUAL_REVIEW";
+
+        order.reviewReason =
+          "PAYMENT_CURRENCY_MISMATCH";
+
+        order.paymentId =
+          payment.id;
+
+        order.webhookEventId =
+          event.event_id;
+
+        order.updatedAt =
+          new Date()
+            .toISOString();
+
+
+        orders[
+          orderIndex
+        ] =
+          order;
+
+
+        writeOrders(
+          orders
+        );
+
+
+        return response
+          .status(200)
+          .send(
+            "Manual review required"
+          );
+      }
+
+
+      /*
+       * PAYMENT IS NOW VERIFIED.
+       *
+       * Only NOW does the order become PAID.
+       */
+      order.status =
+        "PAID";
+
+      order.paymentStatus =
+        "COMPLETED";
+
+      order.paymentId =
+        payment.id;
+
       order.paidAmountCents =
         paidAmountCents;
-      order.currency = paidCurrency;
+
+      order.currency =
+        paidCurrency;
 
       order.admissionCode =
         order.admissionCode ||
@@ -988,100 +1727,156 @@ app.post(
         event.event_id;
 
       order.paidAt =
-        new Date().toISOString();
+        new Date()
+          .toISOString();
 
       order.updatedAt =
-        new Date().toISOString();
+        new Date()
+          .toISOString();
+
+      order.checkedIn =
+        false;
 
       order.emailStatus =
-        order.emailStatus || "NOT_SENT";
+        order.emailStatus ||
+        "NOT_SENT";
 
-      order.checkedIn = false;
+      order.sheetStatus =
+        order.sheetStatus ||
+        "NOT_SAVED";
 
-      orders[orderIndex] = order;
-      writeOrders(orders);
+
+      orders[
+        orderIndex
+      ] =
+        order;
+
+
+      writeOrders(
+        orders
+      );
+
 
       console.log("");
-      console.log("GARBA ORDER VERIFIED");
+      console.log(
+        "GARBA ORDER VERIFIED"
+      );
+
       console.log(
         "Purchaser:",
         order.fullName
       );
-      console.log("Email:", order.email);
+
       console.log(
         "Tickets:",
         order.quantity
       );
+
       console.log(
         "Paid:",
-        formatCad(paidAmountCents)
+        formatCad(
+          paidAmountCents
+        )
       );
+
       console.log(
         "Admission code:",
         order.admissionCode
       );
-      console.log(
-        "Paid tickets:",
-        getPaidTicketCount()
-      );
-      console.log(
-        "Remaining capacity:",
-        getRemainingCapacity()
-      );
-      console.log("");
+
 
       /*
-       * Respond immediately so Square knows the webhook was received.
+       * Respond to Square FIRST.
        */
       response
         .status(200)
-        .send("Payment verified");
+        .send(
+          "Payment verified"
+        );
+
 
       /*
-       * Send exactly one event confirmation email after payment verification.
+       * Only AFTER COMPLETED payment verification:
+       *
+       * 1. Send confirmation email.
+       * 2. Add customer to Google Sheet.
        */
-      setImmediate(() => {
-        void sendConfirmationEmail(
-          order.localOrderId
-        );
-      });
+      setImmediate(
+        () => {
+          void sendConfirmationEmail(
+            order.localOrderId
+          );
+
+          void savePaidOrderToGoogleSheet(
+            order.localOrderId
+          );
+        }
+      );
+
     } catch (error) {
       console.error(
         "Webhook processing failed:",
         error
       );
 
-      response.sendStatus(400);
+      response
+        .sendStatus(
+          400
+        );
     }
   }
 );
 
-/*
- * Normal JSON middleware must remain below the raw webhook route.
- */
-app.use(express.json());
 
-/* -------------------------------------------------------------------------- */
-/* Environment validation                                                     */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   NORMAL JSON
+   ========================================================================== */
+
+app.use(
+  express.json()
+);
+
+
+/* ==========================================================================
+   ENVIRONMENT VALIDATION
+   ========================================================================== */
 
 function validateEnvironment() {
-  const requiredValues = {
+  const required = {
     SQUARE_ACCESS_TOKEN,
     SQUARE_LOCATION_ID,
     SQUARE_WEBHOOK_SIGNATURE_KEY,
     SQUARE_WEBHOOK_URL,
     GMAIL_USER,
     GMAIL_APP_PASSWORD,
+    GOOGLE_SHEETS_WEBHOOK_URL,
+    GOOGLE_SHEETS_SECRET
   };
 
-  const missing = Object.entries(
-    requiredValues
-  )
-    .filter(([, value]) => !value)
-    .map(([name]) => name);
 
-  if (missing.length > 0) {
+  const missing =
+    Object
+      .entries(
+        required
+      )
+      .filter(
+        (
+          [, value]
+        ) =>
+          !value
+      )
+      .map(
+        (
+          [name]
+        ) =>
+          name
+      );
+
+
+  if (
+    missing.length >
+    0
+  ) {
     throw new Error(
       `Missing environment variables: ${missing.join(
         ", "
@@ -1090,49 +1885,83 @@ function validateEnvironment() {
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Health check                                                               */
-/* -------------------------------------------------------------------------- */
 
-app.get("/health", (request, response) => {
-  response.json({
-    success: true,
-    message:
-      "Garba payment server is running.",
-    environment: SQUARE_ENVIRONMENT,
-    ticketPriceCents: TICKET_PRICE_CENTS,
-    maximumCapacity: MAX_CAPACITY,
-    paidTickets: getPaidTicketCount(),
-    pendingTickets:
-      getPendingTicketCount(),
-    remainingCapacity:
-      getRemainingCapacity(),
-    webhookConfigured: Boolean(
-      SQUARE_WEBHOOK_SIGNATURE_KEY &&
-        SQUARE_WEBHOOK_URL
-    ),
-    emailConfigured: Boolean(
-      emailTransporter
-    ),
-  });
-});
+/* ==========================================================================
+   HEALTH
+   ========================================================================== */
 
-/* -------------------------------------------------------------------------- */
-/* Create Square checkout                                                     */
-/* -------------------------------------------------------------------------- */
+app.get(
+  "/health",
+  (
+    request,
+    response
+  ) => {
+    response.json({
+      success: true,
+
+      message:
+        "Garba payment server is running.",
+
+      environment:
+        SQUARE_ENVIRONMENT,
+
+      ticketPriceCents:
+        TICKET_PRICE_CENTS,
+
+      maximumCapacity:
+        MAX_CAPACITY,
+
+      paidTickets:
+        getPaidTicketCount(),
+
+      pendingTickets:
+        getPendingTicketCount(),
+
+      remainingCapacity:
+        getRemainingCapacity(),
+
+      webhookConfigured:
+        Boolean(
+          SQUARE_WEBHOOK_SIGNATURE_KEY &&
+          SQUARE_WEBHOOK_URL
+        ),
+
+      emailConfigured:
+        Boolean(
+          emailTransporter
+        ),
+
+      googleSheetsConfigured:
+        Boolean(
+          GOOGLE_SHEETS_WEBHOOK_URL &&
+          GOOGLE_SHEETS_SECRET
+        )
+    });
+  }
+);
+
+
+/* ==========================================================================
+   CREATE CHECKOUT
+   ========================================================================== */
 
 app.post(
   "/api/create-checkout",
 
-  async (request, response) => {
+  async (
+    request,
+    response
+  ) => {
     try {
       const customer =
         validateCheckoutRequest(
           request.body
         );
 
+
       const remainingCapacity =
         getRemainingCapacity();
+
 
       if (
         customer.quantity >
@@ -1144,21 +1973,25 @@ app.post(
             success: false,
 
             message:
-              remainingCapacity === 0
+              remainingCapacity ===
+              0
                 ? "Garba Night is currently sold out."
-                : `Only ${remainingCapacity} ticket(s) are currently available.`,
+                : `Only ${remainingCapacity} ticket(s) are currently available.`
           });
       }
+
 
       const totalAmountCents =
         customer.quantity *
         TICKET_PRICE_CENTS;
+
 
       const localOrderId =
         `GARBA-${Date.now()}-${crypto
           .randomBytes(3)
           .toString("hex")
           .toUpperCase()}`;
+
 
       const squareRequest = {
         idempotency_key:
@@ -1170,19 +2003,24 @@ app.post(
         quick_pay: {
           name:
             `Garba Night — ${customer.quantity} Ticket${
-              customer.quantity === 1
+              customer.quantity ===
+              1
                 ? ""
                 : "s"
             }`,
 
           price_money: {
-            amount: totalAmountCents,
-            currency: "CAD",
+            amount:
+              totalAmountCents,
+
+            currency:
+              "CAD"
           },
 
           location_id:
-            SQUARE_LOCATION_ID,
+            SQUARE_LOCATION_ID
         },
+
 
         checkout_options: {
           redirect_url:
@@ -1191,28 +2029,35 @@ app.post(
           ask_for_shipping_address:
             false,
 
-          enable_coupon: false,
-          enable_loyalty: false,
+          enable_coupon:
+            false,
+
+          enable_loyalty:
+            false
         },
+
 
         pre_populated_data: {
           buyer_email:
             customer.email,
 
           buyer_phone_number:
-            customer.phone,
+            customer.phone
         },
 
+
         payment_note:
-          localOrderId,
+          localOrderId
       };
+
 
       const squareResponse =
         await fetch(
           `${SQUARE_API_BASE}/v2/online-checkout/payment-links`,
 
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               Authorization:
@@ -1222,19 +2067,25 @@ app.post(
                 "application/json",
 
               "Square-Version":
-                "2026-07-15",
+                "2026-07-15"
             },
 
-            body: JSON.stringify(
-              squareRequest
-            ),
+            body:
+              JSON.stringify(
+                squareRequest
+              )
           }
         );
 
-      const squareData =
-        await squareResponse.json();
 
-      if (!squareResponse.ok) {
+      const squareData =
+        await squareResponse
+          .json();
+
+
+      if (
+        !squareResponse.ok
+      ) {
         console.error(
           "Square checkout error:",
           JSON.stringify(
@@ -1244,22 +2095,30 @@ app.post(
           )
         );
 
+
         return response
           .status(502)
           .json({
             success: false,
 
             message:
-              squareData.errors?.[0]
+              squareData
+                .errors
+                ?.[0]
                 ?.detail ||
-              squareData.errors?.[0]
+              squareData
+                .errors
+                ?.[0]
                 ?.code ||
-              "Square could not create the checkout.",
+              "Square could not create the checkout."
           });
       }
 
+
       const paymentLink =
-        squareData.payment_link;
+        squareData
+          .payment_link;
+
 
       if (
         !paymentLink?.url ||
@@ -1269,16 +2128,40 @@ app.post(
           .status(502)
           .json({
             success: false,
+
             message:
-              "Square did not return a valid checkout link.",
+              "Square did not return a valid checkout link."
           });
       }
 
+
       const now =
-        new Date().toISOString();
+        new Date()
+          .toISOString();
 
-      const orders = readOrders();
 
+      /*
+       * Consent is captured when the user
+       * actively checks the optional box.
+       */
+      const marketingConsentTimestamp =
+        customer
+          .marketingConsent
+          ? now
+          : null;
+
+
+      const orders =
+        readOrders();
+
+
+      /*
+       * This order IS stored locally as PENDING
+       * because we need to match Square's eventual
+       * webhook to the customer.
+       *
+       * BUT IT IS NOT SENT TO GOOGLE SHEETS YET.
+       */
       orders.push({
         localOrderId,
 
@@ -1294,9 +2177,6 @@ app.post(
         phone:
           customer.phone,
 
-        notes:
-          customer.notes,
-
         quantity:
           customer.quantity,
 
@@ -1306,72 +2186,129 @@ app.post(
         expectedAmountCents:
           totalAmountCents,
 
-        currency: "CAD",
+        currency:
+          "CAD",
 
-        status: "PENDING",
+        marketingConsent:
+          customer.marketingConsent,
 
-        paymentStatus: "PENDING",
+        marketingConsentTimestamp,
 
-        paymentId: null,
+        marketingConsentSource:
+          customer
+            .marketingConsent
+            ? "Garba Night 2026 online checkout"
+            : null,
 
-        admissionCode: null,
+        marketingConsentVersion:
+          customer
+            .marketingConsent
+            ? "1"
+            : null,
 
-        emailStatus: "NOT_SENT",
+        status:
+          "PENDING",
 
-        emailMessageId: null,
+        paymentStatus:
+          "PENDING",
 
-        emailAttemptedAt: null,
+        paymentId:
+          null,
 
-        emailSentAt: null,
+        admissionCode:
+          null,
 
-        emailError: null,
+        emailStatus:
+          "NOT_SENT",
 
-        checkedIn: false,
+        emailMessageId:
+          null,
 
-        reviewReason: null,
+        emailAttemptedAt:
+          null,
 
-        createdAt: now,
+        emailSentAt:
+          null,
 
-        updatedAt: now,
+        emailError:
+          null,
 
-        paidAt: null,
+        sheetStatus:
+          "NOT_SAVED",
 
-        expiredAt: null,
+        sheetAttemptedAt:
+          null,
+
+        sheetSavedAt:
+          null,
+
+        sheetError:
+          null,
+
+        checkedIn:
+          false,
+
+        reviewReason:
+          null,
+
+        createdAt:
+          now,
+
+        updatedAt:
+          now,
+
+        paidAt:
+          null,
+
+        expiredAt:
+          null
       });
 
-      writeOrders(orders);
+
+      writeOrders(
+        orders
+      );
+
 
       console.log("");
       console.log(
         "Square checkout created"
       );
+
       console.log(
         "Local order ID:",
         localOrderId
       );
+
       console.log(
         "Square order ID:",
         paymentLink.order_id
       );
+
       console.log(
         "Purchaser:",
         customer.fullName
       );
+
       console.log(
         "Quantity:",
         customer.quantity
       );
+
       console.log(
-        "Total cents:",
-        totalAmountCents
+        "Marketing consent:",
+        customer
+          .marketingConsent
       );
+
       console.log(
-        "Order saved to orders.json"
+        "NOT added to Google Sheets — payment pending."
       );
-      console.log("");
+
 
       response.json({
-        success: true,
+        success:
+          true,
 
         checkoutUrl:
           paymentLink.url,
@@ -1387,55 +2324,71 @@ app.post(
         totalAmountCents,
 
         remainingCapacity:
-          getRemainingCapacity(),
+          getRemainingCapacity()
       });
+
     } catch (error) {
       console.error(
         "Checkout creation failed:",
         error
       );
 
+
       response
         .status(400)
         .json({
-          success: false,
+          success:
+            false,
 
           message:
             error.message ||
-            "Unable to create checkout.",
+            "Unable to create checkout."
         });
     }
   }
 );
 
-/* -------------------------------------------------------------------------- */
-/* View safe order status                                                     */
-/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   SAFE ORDER STATUS
+   ========================================================================== */
 
 app.get(
   "/api/order/:localOrderId",
 
-  (request, response) => {
+  (
+    request,
+    response
+  ) => {
     const localOrderId =
       cleanText(
-        request.params.localOrderId,
+        request.params
+          .localOrderId,
         100
       );
 
-    const order = readOrders().find(
-      (item) =>
-        item.localOrderId ===
-        localOrderId
-    );
+
+    const order =
+      readOrders()
+        .find(
+          (item) =>
+            item.localOrderId ===
+            localOrderId
+        );
+
 
     if (!order) {
       return response
         .status(404)
         .json({
-          success: false,
-          message: "Order not found.",
+          success:
+            false,
+
+          message:
+            "Order not found."
         });
     }
+
 
     response.json({
       success: true,
@@ -1451,56 +2404,78 @@ app.get(
           order.quantity,
 
         admissionCode:
-          order.status === "PAID"
+          order.status ===
+          "PAID"
             ? order.admissionCode
             : null,
 
         emailStatus:
           order.emailStatus,
-      },
+
+        sheetStatus:
+          order.sheetStatus
+      }
     });
   }
 );
 
-/* -------------------------------------------------------------------------- */
-/* Start server                                                               */
-/* -------------------------------------------------------------------------- */
+
+/* ==========================================================================
+   START
+   ========================================================================== */
 
 try {
   ensureOrdersFile();
+
   validateEnvironment();
 
-  app.listen(PORT, () => {
-    console.log("");
-    console.log(
-      "Garba payment backend started"
-    );
-    console.log(
-      `Server: http://localhost:${PORT}`
-    );
-    console.log(
-      `Health check: http://localhost:${PORT}/health`
-    );
-    console.log(
-      `Square environment: ${SQUARE_ENVIRONMENT}`
-    );
-    console.log(
-      `Webhook route: ${SQUARE_WEBHOOK_URL}`
-    );
-    console.log(
-      `Orders file: ${ORDERS_FILE}`
-    );
-    console.log(
-      `Paid tickets: ${getPaidTicketCount()}`
-    );
-    console.log(
-      `Remaining capacity: ${getRemainingCapacity()}`
-    );
-    console.log(
-      "Email notifications: configured"
-    );
-    console.log("");
-  });
+
+  app.listen(
+    PORT,
+    () => {
+      console.log("");
+      console.log(
+        "Garba payment backend started"
+      );
+
+      console.log(
+        `Server: http://localhost:${PORT}`
+      );
+
+      console.log(
+        `Square environment: ${SQUARE_ENVIRONMENT}`
+      );
+
+      console.log(
+        `Ticket price: ${formatCad(
+          TICKET_PRICE_CENTS
+        )}`
+      );
+
+      console.log(
+        `Maximum capacity: ${MAX_CAPACITY}`
+      );
+
+      console.log(
+        `Paid tickets: ${getPaidTicketCount()}`
+      );
+
+      console.log(
+        `Remaining capacity: ${getRemainingCapacity()}`
+      );
+
+      console.log(
+        "Email notifications: configured"
+      );
+
+      console.log(
+        "Google Sheets: configured"
+      );
+
+      console.log("");
+    }
+  );
+
 } catch (error) {
   console.error(
     "Server could not start:",
