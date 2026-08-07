@@ -919,4 +919,37 @@ a {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .summary-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 24px 0;
+  margin-top: 20px;
+  border-top: none;
+  border-bottom: 1px solid rgba(80, 40, 30, 0.15);
+}
+
+.summary-lines > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 16px;
+}
+
+.summary-lines > div + div {
+  padding-top: 16px;
+  padding-bottom: 0;
+  border-top: 1px solid rgba(80, 40, 30, 0.15);
+}
+
+.summary-lines span {
+  color: #6d554d;
+}
+
+.summary-lines strong {
+  color: #2b1712;
+  text-align: right;
+}
 }
