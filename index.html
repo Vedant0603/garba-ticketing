@@ -28,14 +28,128 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="./style.css?v=10" />
+  <link rel="stylesheet" href="./style.css?v=20" />
+
+  <style>
+    .purchaser-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .purchaser-grid .field {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .purchaser-grid .field input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .checkbox-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .consent-row input {
+      flex: 0 0 auto;
+      margin-top: 4px;
+    }
+
+    .marketing-consent {
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(80, 40, 30, 0.12);
+    }
+
+    .optional-label {
+      font-weight: 700;
+    }
+
+    .summary-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 24px 0;
+      margin-top: 20px;
+      border-top: 1px solid rgba(80, 40, 30, 0.15);
+      border-bottom: 1px solid rgba(80, 40, 30, 0.15);
+    }
+
+    .summary-lines > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .summary-lines span {
+      color: #6d554d;
+    }
+
+    .summary-lines strong {
+      color: #2b1712;
+      text-align: right;
+    }
+
+    .summary-total-only {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 26px 0 20px;
+    }
+
+    .summary-total-only span {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .summary-total-only strong {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .summary-buy-button {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 17px 22px;
+      margin-top: 4px;
+      background: #cf371f;
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .summary-buy-button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 900px) {
+      .purchaser-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- =========================
-       HEADER
-  ========================== -->
   <header class="site-header">
     <div class="container nav">
 
@@ -63,14 +177,8 @@
   </header>
 
 
-  <!-- =========================
-       MAIN
-  ========================== -->
   <main id="top">
 
-    <!-- =========================
-         HERO
-    ========================== -->
     <section class="hero">
 
       <div class="hero-glow hero-glow-one"></div>
@@ -95,7 +203,6 @@
           </p>
 
 
-          <!-- EVENT DETAILS -->
           <div class="event-details">
 
             <div class="detail-card">
@@ -146,7 +253,6 @@
         </div>
 
 
-        <!-- HERO TICKET ART -->
         <div
           class="hero-card"
           aria-label="Garba Night ticket preview"
@@ -179,15 +285,13 @@
             </div>
 
           </div>
+
         </div>
 
       </div>
     </section>
 
 
-    <!-- =========================
-         TICKETS
-    ========================== -->
     <section
       class="tickets-section"
       id="tickets"
@@ -206,8 +310,8 @@
           </h2>
 
           <p>
-            Enter the purchaser’s information and the number of
-            tickets needed. You will then be redirected to
+            Enter the purchaser’s information and the number
+            of tickets needed. You will then be redirected to
             Square’s secure payment page.
           </p>
 
@@ -222,9 +326,6 @@
             novalidate
           >
 
-            <!-- =====================
-                 SELECT TICKETS
-            ====================== -->
             <div class="form-section">
 
               <div class="form-section-heading">
@@ -232,12 +333,16 @@
                 <span>1</span>
 
                 <div>
-                  <h3>Select tickets</h3>
+
+                  <h3>
+                    Select tickets
+                  </h3>
 
                   <p>
                     Enter any whole-number quantity,
                     subject to availability.
                   </p>
+
                 </div>
 
               </div>
@@ -260,17 +365,11 @@
 
                 <div class="ticket-price">
 
-                  <strong
-                    id="ticket-price-label"
-                    data-ticket-price
-                  >
-                    $11.00
-                  </strong>
-
-
                   <label class="quantity-control">
 
-                    <span>Quantity</span>
+                    <span>
+                      Quantity
+                    </span>
 
                     <input
                       id="quantity"
@@ -281,7 +380,6 @@
                       max="1000"
                       step="1"
                       value="1"
-                      placeholder="1"
                       required
                     />
 
@@ -301,9 +399,6 @@
             </div>
 
 
-            <!-- =====================
-                 PURCHASER INFORMATION
-            ====================== -->
             <div class="form-section">
 
               <div class="form-section-heading">
@@ -326,9 +421,8 @@
               </div>
 
 
-              <div class="form-grid">
+              <div class="purchaser-grid">
 
-                <!-- NAME -->
                 <div class="field">
 
                   <label for="fullName">
@@ -350,7 +444,6 @@
                 </div>
 
 
-                <!-- EMAIL -->
                 <div class="field">
 
                   <label for="email">
@@ -372,7 +465,6 @@
                 </div>
 
 
-                <!-- PHONE -->
                 <div class="field">
 
                   <label for="phone">
@@ -398,9 +490,6 @@
             </div>
 
 
-            <!-- =====================
-                 ENTRY POLICY
-            ====================== -->
             <div class="entry-policy">
 
               <h3>
@@ -427,7 +516,7 @@
                 <li>
                   Admission is approved only after the
                   admission code is validated against the
-                  live check-in system.
+                  event registration records.
                 </li>
 
               </ul>
@@ -435,24 +524,52 @@
             </div>
 
 
-            <!-- AGREEMENT -->
-            <label class="consent-row">
+            <div class="checkbox-options">
 
-              <input
-                id="agreement"
-                name="agreement"
-                type="checkbox"
-                required
-              />
+              <label class="consent-row marketing-consent">
 
-              <span>
-                I confirm that the information entered is
-                correct, the named purchaser will attend,
-                and tickets will only be issued after Square
-                confirms successful payment.
-              </span>
+                <input
+                  id="marketingConsent"
+                  name="marketingConsent"
+                  type="checkbox"
+                  value="yes"
+                />
 
-            </label>
+                <span>
+
+                  <span class="optional-label">
+                    Optional:
+                  </span>
+
+                  Yes, I would like to receive emails from
+                  Shree Hari Seva Trust about future events,
+                  announcements and related updates. I understand
+                  that I can unsubscribe at any time.
+
+                </span>
+
+              </label>
+
+
+              <label class="consent-row">
+
+                <input
+                  id="agreement"
+                  name="agreement"
+                  type="checkbox"
+                  required
+                />
+
+                <span>
+                  I confirm that the information entered is
+                  correct, the named purchaser will attend,
+                  and tickets will only be issued after Square
+                  confirms successful payment.
+                </span>
+
+              </label>
+
+            </div>
 
 
             <button
@@ -460,7 +577,7 @@
               id="pay-button"
               type="submit"
             >
-              Pay Securely with Square
+              Buy Tickets
             </button>
 
 
@@ -473,9 +590,6 @@
           </form>
 
 
-          <!-- =====================
-               ORDER SUMMARY
-          ====================== -->
           <aside class="order-summary">
 
             <p class="summary-label">
@@ -487,7 +601,9 @@
 
               <div class="summary-date">
 
-                <span>OCT</span>
+                <span>
+                  OCT
+                </span>
 
                 <strong>
                   18
@@ -520,23 +636,11 @@
               <div>
 
                 <span>
-                  Early bird admission ×
-
-                  <b
-                    id="summary-quantity"
-                    data-ticket-quantity
-                  >
-                    1
-                  </b>
-
+                  Early Bird Tickets
                 </span>
 
-
-                <strong
-                  id="summary-subtotal"
-                  data-ticket-subtotal
-                >
-                  $11.00
+                <strong>
+                  $11.00 each
                 </strong>
 
               </div>
@@ -545,11 +649,14 @@
               <div>
 
                 <span>
-                  Website service fee
+                  Total Tickets Purchased
                 </span>
 
-                <strong>
-                  $0.00
+                <strong
+                  id="summary-quantity"
+                  data-ticket-quantity
+                >
+                  1
                 </strong>
 
               </div>
@@ -557,7 +664,7 @@
             </div>
 
 
-            <div class="summary-total">
+            <div class="summary-total-only">
 
               <span>
                 Total
@@ -567,109 +674,21 @@
                 id="summary-total"
                 data-ticket-total
               >
-                $11.00 CAD
+                $11.00
               </strong>
 
             </div>
 
 
-            <div class="payment-badge">
-
-              <span>
-                🔒
-              </span>
-
-              <div>
-
-                <strong>
-                  Secure Square Checkout
-                </strong>
-
-                <p>
-                  Card and supported digital-wallet payments.
-                </p>
-
-              </div>
-
-            </div>
+            <button
+              class="summary-buy-button"
+              id="summary-buy-button"
+              type="button"
+            >
+              Buy Tickets
+            </button>
 
           </aside>
-
-        </div>
-      </div>
-
-    </section>
-
-
-    <!-- =========================
-         HOW IT WORKS
-    ========================== -->
-    <section class="how-it-works">
-
-      <div class="container">
-
-        <div class="section-heading centered">
-
-          <p class="eyebrow">
-            HOW IT WORKS
-          </p>
-
-          <h2>
-            Secure automatic checkout
-          </h2>
-
-        </div>
-
-
-        <div class="steps-grid">
-
-          <article class="step-card">
-
-            <span>01</span>
-
-            <h3>
-              Order
-            </h3>
-
-            <p>
-              Enter the purchaser details and choose
-              the number of tickets.
-            </p>
-
-          </article>
-
-
-          <article class="step-card">
-
-            <span>02</span>
-
-            <h3>
-              Pay
-            </h3>
-
-            <p>
-              Complete payment on Square’s secure
-              hosted checkout page.
-            </p>
-
-          </article>
-
-
-          <article class="step-card">
-
-            <span>03</span>
-
-            <h3>
-              Receive
-            </h3>
-
-            <p>
-              After successful payment, you will receive
-              one confirmation email containing your
-              admission code and ticket information.
-            </p>
-
-          </article>
 
         </div>
 
@@ -680,9 +699,6 @@
   </main>
 
 
-  <!-- =========================
-       FOOTER
-  ========================== -->
   <footer class="site-footer">
 
     <div class="container footer-content">
@@ -709,7 +725,7 @@
   </footer>
 
 
-  <script src="./js/app.js?v=12"></script>
+  <script src="./js/app.js?v=20"></script>
 
 </body>
 </html>

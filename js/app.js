@@ -1,26 +1,42 @@
 "use strict";
 
+
+/* ==========================================================================
+   PRODUCTION CONFIGURATION
+   ========================================================================== */
+
 const API_BASE =
-  "http://localhost:3000";
+  "https://garba-ticketing-production.up.railway.app";
 
 const TICKET_PRICE_CENTS =
+  1100;
+
+const MAX_CAPACITY =
   1000;
+
+
+/* ==========================================================================
+   START
+   ========================================================================== */
 
 document.addEventListener(
   "DOMContentLoaded",
   () => {
+
     const form =
       document.querySelector(
         "#ticket-form"
       );
 
+
     if (!form) {
       console.error(
-        'Could not find #ticket-form'
+        "Could not find #ticket-form"
       );
 
       return;
     }
+
 
     const quantityInput =
       document.querySelector(
@@ -42,9 +58,9 @@ document.addEventListener(
         "#phone"
       );
 
-    const notesInput =
+    const marketingConsentInput =
       document.querySelector(
-        "#notes"
+        "#marketingConsent"
       );
 
     const agreementInput =
@@ -57,16 +73,21 @@ document.addEventListener(
         "#pay-button"
       );
 
-    /*
-     * Handle customer returning from Square.
-     *
-     * We deliberately DO NOT show backend/payment
-     * verification details to the customer.
-     */
+    const summaryBuyButton =
+      document.querySelector(
+        "#summary-buy-button"
+      );
+
+
+    /* ======================================================================
+       SQUARE RETURN
+       ====================================================================== */
+
     const url =
       new URL(
         window.location.href
       );
+
 
     if (
       url.searchParams.get(
@@ -74,13 +95,12 @@ document.addEventListener(
       ) === "return"
     ) {
       alert(
-        "Thank you! Your order has been submitted successfully.\n\nYour Garba Night confirmation and admission code will be sent to your email and phone number.\n\nAt the event, show either the live email or live text message and bring your driver's licence or another government-issued photo ID."
+        "Thank you! Your order has been submitted successfully.\n\n" +
+        "Once Square confirms your payment, your Garba Night confirmation and admission code will be sent to your email.\n\n" +
+        "At the event, show the confirmation email and bring government-issued photo ID matching the purchaser's name."
       );
 
-      /*
-       * Remove ?payment=return so refreshing
-       * does not show the message again.
-       */
+
       window.history.replaceState(
         {},
         document.title,
@@ -88,28 +108,46 @@ document.addEventListener(
       );
     }
 
-    /* ---------------------------------------------------------------------- */
-    /* Order summary                                                          */
-    /* ---------------------------------------------------------------------- */
+
+    /* ======================================================================
+       QUANTITY
+       ====================================================================== */
 
     function getQuantity() {
-      const value =
+
+      let quantity =
         Number(
           quantityInput?.value ||
-            1
+          1
         );
+
 
       if (
         !Number.isInteger(
-          value
+          quantity
         ) ||
-        value < 1
+        quantity < 1
       ) {
-        return 1;
+        quantity = 1;
       }
 
-      return value;
+
+      if (
+        quantity >
+        MAX_CAPACITY
+      ) {
+        quantity =
+          MAX_CAPACITY;
+      }
+
+
+      return quantity;
     }
+
+
+    /* ======================================================================
+       MONEY
+       ====================================================================== */
 
     function formatMoney(
       cents
@@ -121,123 +159,202 @@ document.addEventListener(
             "currency",
 
           currency:
-            "CAD",
+            "CAD"
         }
       ).format(
         cents / 100
       );
     }
 
+
+    /* ======================================================================
+       SUMMARY
+       ====================================================================== */
+
     function updateSummary() {
+
       const quantity =
         getQuantity();
+
 
       const total =
         quantity *
         TICKET_PRICE_CENTS;
 
-      /*
-       * These selectors support several common
-       * IDs/classes so your existing HTML does
-       * not need unnecessary changes.
-       */
 
       const quantityDisplays =
         document.querySelectorAll(
           "[data-ticket-quantity], #summary-quantity"
         );
 
+
       quantityDisplays.forEach(
         (element) => {
-          element.textContent =
-            quantity;
-        }
-      );
 
-      const subtotalDisplays =
-        document.querySelectorAll(
-          "[data-ticket-subtotal], #summary-subtotal"
-        );
-
-      subtotalDisplays.forEach(
-        (element) => {
           element.textContent =
-            formatMoney(
-              total
+            String(
+              quantity
             );
+
         }
       );
+
 
       const totalDisplays =
         document.querySelectorAll(
           "[data-ticket-total], #summary-total"
         );
 
+
       totalDisplays.forEach(
         (element) => {
+
           element.textContent =
             formatMoney(
               total
             );
+
         }
       );
     }
 
-    if (quantityInput) {
+
+    if (
+      quantityInput
+    ) {
+
+      quantityInput.setAttribute(
+        "min",
+        "1"
+      );
+
+      quantityInput.setAttribute(
+        "max",
+        String(
+          MAX_CAPACITY
+        )
+      );
+
+
       quantityInput.addEventListener(
         "input",
         updateSummary
       );
 
+
       quantityInput.addEventListener(
         "change",
-        updateSummary
+        () => {
+
+          quantityInput.value =
+            String(
+              getQuantity()
+            );
+
+
+          updateSummary();
+        }
       );
     }
 
+
     updateSummary();
 
-    /* ---------------------------------------------------------------------- */
-    /* Checkout                                                               */
-    /* ---------------------------------------------------------------------- */
+
+    /* ======================================================================
+       SUMMARY BUY BUTTON
+       ====================================================================== */
+
+    if (
+      summaryBuyButton &&
+      payButton
+    ) {
+
+      summaryBuyButton.addEventListener(
+        "click",
+        () => {
+
+          payButton.scrollIntoView({
+            behavior:
+              "smooth",
+
+            block:
+              "center"
+          });
+
+        }
+      );
+    }
+
+
+    /* ======================================================================
+       CHECKOUT
+       ====================================================================== */
 
     form.addEventListener(
       "submit",
 
-      async (event) => {
-        /*
-         * CRITICAL:
-         *
-         * Prevent normal HTML form submission.
-         * Otherwise the page refreshes and clears
-         * everything instead of going to Square.
-         */
+      async (
+        event
+      ) => {
+
         event.preventDefault();
+
 
         const quantity =
           getQuantity();
 
+
         const fullName =
           fullNameInput?.value
-            ?.trim();
-
-        const email =
-          emailInput?.value
-            ?.trim();
-
-        const phone =
-          phoneInput?.value
-            ?.trim();
-
-        const notes =
-          notesInput?.value
             ?.trim() ||
           "";
 
+
+        const email =
+          emailInput?.value
+            ?.trim() ||
+          "";
+
+
+        const phone =
+          phoneInput?.value
+            ?.trim() ||
+          "";
+
+
+        const marketingConsent =
+          Boolean(
+            marketingConsentInput
+              ?.checked
+          );
+
+
+        /* ------------------------------------------------------------------
+           VALIDATION
+           ------------------------------------------------------------------ */
+
         if (
-          !fullName ||
-          fullName.length < 2
+          quantity < 1 ||
+          quantity >
+          MAX_CAPACITY
         ) {
+
+          alert(
+            "Please select a valid number of tickets."
+          );
+
+          quantityInput?.focus();
+
+          return;
+        }
+
+
+        if (
+          fullName.length <
+          2
+        ) {
+
           alert(
             "Please enter the purchaser's full legal name."
           );
@@ -247,9 +364,19 @@ document.addEventListener(
           return;
         }
 
-        if (!email) {
+
+        const emailPattern =
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+        if (
+          !emailPattern.test(
+            email
+          )
+        ) {
+
           alert(
-            "Please enter your email address."
+            "Please enter a valid email address."
           );
 
           emailInput?.focus();
@@ -257,7 +384,9 @@ document.addEventListener(
           return;
         }
 
+
         if (!phone) {
+
           alert(
             "Please enter your phone number."
           );
@@ -267,10 +396,12 @@ document.addEventListener(
           return;
         }
 
+
         if (
           agreementInput &&
           !agreementInput.checked
         ) {
+
           alert(
             "Please confirm the entry requirements before continuing."
           );
@@ -280,11 +411,17 @@ document.addEventListener(
           return;
         }
 
-        const originalButtonText =
-          payButton?.textContent ||
-          "Pay Securely with Square";
 
-        if (payButton) {
+        const originalButtonText =
+          payButton?.textContent
+            ?.trim() ||
+          "Buy Tickets";
+
+
+        if (
+          payButton
+        ) {
+
           payButton.disabled =
             true;
 
@@ -292,7 +429,22 @@ document.addEventListener(
             "Opening Secure Checkout...";
         }
 
+
+        if (
+          summaryBuyButton
+        ) {
+
+          summaryBuyButton.disabled =
+            true;
+        }
+
+
+        /* ------------------------------------------------------------------
+           CALL RAILWAY
+           ------------------------------------------------------------------ */
+
         try {
+
           const response =
             await fetch(
               `${API_BASE}/api/create-checkout`,
@@ -302,81 +454,130 @@ document.addEventListener(
                   "POST",
 
                 headers: {
+
                   "Content-Type":
-                    "application/json",
+                    "application/json"
+
                 },
 
                 body:
                   JSON.stringify({
+
                     fullName,
+
                     email,
+
                     phone,
-                    notes,
+
                     quantity,
-                  }),
+
+                    marketingConsent
+
+                  })
               }
             );
 
-          const data =
-            await response.json();
+
+          let data;
+
+
+          try {
+
+            data =
+              await response.json();
+
+          } catch {
+
+            throw new Error(
+              "The ticket server returned an invalid response."
+            );
+
+          }
+
 
           if (
             !response.ok ||
             !data.success
           ) {
+
             throw new Error(
               data.message ||
-                "Unable to create checkout."
+              "Unable to create checkout."
             );
+
           }
+
 
           if (
             !data.checkoutUrl
           ) {
+
             throw new Error(
               "Square checkout URL was not returned."
             );
+
           }
 
-          /*
-           * Store this only for the current browser
-           * in case we need it later.
-           */
+
           if (
             data.localOrderId
           ) {
+
             sessionStorage.setItem(
               "garbaLocalOrderId",
               data.localOrderId
             );
+
           }
 
-          /*
-           * THIS sends the customer to Square.
-           */
+
           window.location.assign(
             data.checkoutUrl
           );
-        } catch (error) {
+
+
+        } catch (
+          error
+        ) {
+
           console.error(
             "Checkout error:",
             error
           );
 
+
           alert(
-            error.message ||
-              "Unable to open Square checkout. Please try again."
+            error?.message ||
+            "Unable to open Square checkout. Please try again."
           );
 
-          if (payButton) {
+
+          if (
+            payButton
+          ) {
+
             payButton.disabled =
               false;
 
             payButton.textContent =
               originalButtonText;
+
           }
+
+
+          if (
+            summaryBuyButton
+          ) {
+
+            summaryBuyButton.disabled =
+              false;
+
+          }
+
         }
+
       }
     );
+
   }
 );
