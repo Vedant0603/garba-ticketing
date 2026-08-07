@@ -52,10 +52,6 @@
         </span>
       </a>
 
-      <!-- IMPORTANT:
-           This is an anchor, NOT a submit button.
-           It only scrolls to the ticket section.
-      -->
       <a
         class="nav-button"
         href="#tickets"
@@ -140,7 +136,6 @@
           </div>
 
 
-          <!-- Also only scrolls -->
           <a
             class="primary-button"
             href="#tickets"
@@ -221,10 +216,6 @@
 
         <div class="checkout-layout">
 
-          <!--
-            IMPORTANT FIX:
-            app.js expects #ticket-form
-          -->
           <form
             class="checkout-card"
             id="ticket-form"
@@ -273,7 +264,7 @@
                     id="ticket-price-label"
                     data-ticket-price
                   >
-                    $10.00
+                    $11.00
                   </strong>
 
 
@@ -287,7 +278,7 @@
                       type="number"
                       inputmode="numeric"
                       min="1"
-                      max="750"
+                      max="1000"
                       step="1"
                       value="1"
                       placeholder="1"
@@ -302,7 +293,7 @@
 
 
               <p class="availability-note">
-                Maximum venue capacity: 750 guests.
+                Maximum venue capacity: 1000 guests.
                 Ticket availability is verified by the system
                 before checkout.
               </p>
@@ -402,32 +393,6 @@
 
                 </div>
 
-
-                <!-- NOTES -->
-                <div class="field">
-
-                  <label for="notes">
-
-                    Notes
-
-                    <span>
-                      (optional)
-                    </span>
-
-                  </label>
-
-                  <input
-                    id="notes"
-                    name="notes"
-                    type="text"
-                    maxlength="200"
-                    placeholder="Accessibility or other notes"
-                  />
-
-                  <small class="error-message"></small>
-
-                </div>
-
               </div>
 
             </div>
@@ -490,12 +455,6 @@
             </label>
 
 
-            <!--
-              IMPORTANT FIX:
-              Only THIS button submits the form.
-
-              app.js expects #pay-button
-            -->
             <button
               class="submit-button"
               id="pay-button"
@@ -577,7 +536,7 @@
                   id="summary-subtotal"
                   data-ticket-subtotal
                 >
-                  $10.00
+                  $11.00
                 </strong>
 
               </div>
@@ -608,7 +567,7 @@
                 id="summary-total"
                 data-ticket-total
               >
-                $10.00 CAD
+                $11.00 CAD
               </strong>
 
             </div>
@@ -750,9 +709,6 @@
   </footer>
 
 
-  <!--
-    Cache-busted so Chrome loads the current app.js
-  -->
   <script src="./js/app.js?v=12"></script>
 
 </body>
