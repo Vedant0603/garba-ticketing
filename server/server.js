@@ -94,7 +94,7 @@ const TICKET_PRICE_CENTS =
   Number(
     process.env
       .TICKET_PRICE_CENTS ||
-    1100
+    500
   );
 
 

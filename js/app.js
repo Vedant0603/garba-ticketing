@@ -9,7 +9,7 @@ const API_BASE =
   "https://garba-ticketing-production.up.railway.app";
 
 const TICKET_PRICE_CENTS =
-  1100;
+  500;
 
 const MAX_CAPACITY =
   1000;
