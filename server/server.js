@@ -1161,6 +1161,161 @@ async function savePaidOrderToGoogleSheet(
 
 }
 
+/* ==========================================================================
+   EMAIL DELIVERY TRACKING -> GOOGLE SHEETS
+   ========================================================================== */
+
+async function updateEmailDeliveryInGoogleSheet(
+  order
+) {
+
+  if (
+    !order ||
+    !GOOGLE_SHEETS_WEBHOOK_URL ||
+    !GOOGLE_SHEETS_SECRET
+  ) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        GOOGLE_SHEETS_WEBHOOK_URL,
+        {
+
+          method:
+            "POST",
+
+          headers: {
+
+            "Content-Type":
+              "text/plain;charset=utf-8"
+
+          },
+
+          body:
+            JSON.stringify({
+
+              secret:
+                GOOGLE_SHEETS_SECRET,
+
+              action:
+                "UPDATE_EMAIL_STATUS",
+
+              localOrderId:
+                order.localOrderId,
+
+              admissionCode:
+                order.admissionCode,
+
+              fullName:
+                order.fullName,
+
+              email:
+                order.email,
+
+              phone:
+                order.phone,
+
+              quantity:
+                order.quantity,
+
+              paidAmount:
+                Number(
+                  order.paidAmountCents ||
+                  0
+                ) /
+                100,
+
+              currency:
+                order.currency ||
+                "CAD",
+
+              emailStatus:
+                order.emailStatus ||
+                "",
+
+              emailSentAt:
+  order.emailSentAt ||
+  "",
+
+emailError:
+  order.emailError ||
+  "",
+
+emailMessageId:
+  order.emailMessageId ||
+  ""
+
+            })
+
+        }
+      );
+
+
+    const responseText =
+      await response.text();
+
+
+    let result;
+
+
+    try {
+
+      result =
+        JSON.parse(
+          responseText
+        );
+
+    } catch {
+
+      result = {
+
+        success:
+          response.ok
+
+      };
+
+    }
+
+
+    if (
+      !response.ok ||
+      !result.success
+    ) {
+
+      console.error(
+        "Google Sheets email-status update failed:",
+        result.message ||
+        `HTTP ${response.status}`
+      );
+
+      return;
+
+    }
+
+
+    console.log(
+      "Google Sheets email status updated:",
+      order.emailStatus,
+      order.email
+    );
+
+
+  } catch (
+    error
+  ) {
+
+    console.error(
+      "Google Sheets email-status tracking error:",
+      error
+    );
+
+  }
+
+}
 
 /* ==========================================================================
    EMAIL
@@ -1516,30 +1671,36 @@ async function sendConfirmationEmail(
       });
 
 
-    updateOrder(
-      localOrderId,
-      {
+    const updatedOrder =
+      updateOrder(
+        localOrderId,
+        {
 
-        emailStatus:
-          "SENT",
+          emailStatus:
+            "SENT",
 
-        emailMessageId:
-          result.messageId,
+          emailMessageId:
+            result.messageId,
 
-        emailSentAt:
-          new Date()
-            .toISOString(),
+          emailSentAt:
+            new Date()
+              .toISOString(),
 
-        emailError:
-          null
+          emailError:
+            null
 
-      }
-    );
+        }
+      );
 
 
     console.log(
       "Confirmation email sent:",
       order.email
+    );
+
+
+    await updateEmailDeliveryInGoogleSheet(
+      updatedOrder
     );
 
 
@@ -1553,20 +1714,29 @@ async function sendConfirmationEmail(
     );
 
 
-    updateOrder(
-      localOrderId,
-      {
+    const updatedOrder =
+      updateOrder(
+        localOrderId,
+        {
 
-        emailStatus:
-          "FAILED",
+          emailStatus:
+            "FAILED",
 
-        emailError:
-          cleanText(
-            error.message,
-            500
-          )
+          emailSentAt:
+            null,
 
-      }
+          emailError:
+            cleanText(
+              error.message,
+              500
+            )
+
+        }
+      );
+
+
+    await updateEmailDeliveryInGoogleSheet(
+      updatedOrder
     );
 
   }
